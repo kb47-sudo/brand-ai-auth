@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>社内専用 プロ仕様AI真贋判定・ネット型番特定ポータル</title>
+  <title>社内専用 プロ仕様AI真贋判定・自動型番特定ポータル</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
@@ -23,9 +23,9 @@
     
     <!-- ヘッダー -->
     <header class="border-b border-gray-800 pb-4 text-center">
-      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">Web Lens Search & Auth v10.0</div>
+      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">AI Image Auto-Detection v11.0</div>
       <h1 class="text-3xl font-extrabold text-white tracking-wide">AI Brand Authenticator Pro</h1>
-      <p class="text-sm text-gray-400 mt-1">Googleレンズ型番検索 ＆ 厳格AI真贋・3大相場査定ポータル</p>
+      <p class="text-sm text-gray-400 mt-1">画像自動型番解析 ＆ 厳格AI真贋・3大相場査定ポータル</p>
     </header>
 
     <!-- 1. 基本情報 -->
@@ -57,27 +57,23 @@
       </div>
     </div>
 
-    <!-- 2. 画像アップロード ＆ Googleレンズ連携 -->
+    <!-- 2. 画像アップロード ＆ AI型番自動検出 -->
     <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-2xl space-y-4">
       <h2 class="text-sm font-semibold text-gray-300">2. 指定部位写真のセット</h2>
       <div id="uploadSlots" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
-      <!-- Googleレンズ検索ボタン -->
-      <div id="lensSearchBox" class="hidden bg-gray-950 p-4 rounded-xl border border-yellow-500/30 space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-yellow-400">🔍 写真からネット上の正確な型番・品番を検索</span>
-          <button type="button" onclick="openGoogleLens()" class="bg-yellow-500 hover:bg-yellow-400 text-gray-950 text-xs font-extrabold px-3 py-1.5 rounded-lg shadow transition">
-            Googleレンズで型番を画像検索
-          </button>
-        </div>
-        <p class="text-xs text-gray-400">※ボタンを押して開いた検索窓右端の「📷マーク」をタップすると、スマホのカメラや画像から同一商品・型番を即座に検索できます。</p>
+      <!-- AI解析ステータス通知 -->
+      <div id="aiDetectStatus" class="hidden bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl flex items-center justify-between">
+        <span class="text-xs text-yellow-400 font-bold flex items-center gap-2">
+          <span class="animate-pulse">🤖</span> 全体写真をAI解析中... 型番を自動特定しています
+        </span>
       </div>
 
       <!-- 型番・シリアル入力欄 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         <div>
-          <label class="block text-xs text-gray-400 mb-1">型番 / 品番 (Ref. / Model No.)</label>
-          <input type="text" id="modelNumber" placeholder="例: M41526, 116610LN" class="w-full bg-gray-950 border border-gray-800 text-sm rounded-xl p-3 text-yellow-400 font-bold focus:outline-none focus:border-yellow-500">
+          <label class="block text-xs text-gray-400 mb-1">型番 / 品番 (AI自動特定 / 手入力可)</label>
+          <input type="text" id="modelNumber" placeholder="画像を貼るとAIが自動入力します" class="w-full bg-gray-950 border border-gray-800 text-sm rounded-xl p-3 text-yellow-400 font-bold focus:outline-none focus:border-yellow-500">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">シリアル / 製造番号 (Serial No.)</label>
@@ -164,31 +160,31 @@
   <script>
     const slotsMap = {
       bag: [
-        { id: "img_overall", label: "① 全体写真 (Googleレンズ検索可)", onchange: "showLensOption()" },
+        { id: "img_overall", label: "① 全体写真 (AI型番自動解析)", onchange: "autoDetectModel(this)" },
         { id: "img_logo", label: "② ブランドロゴ刻印 (接写)" },
         { id: "img_serial", label: "③ シリアル・型番印字" },
         { id: "img_hardware", label: "④ 金具・ビス・ファスナー" }
       ],
       watch: [
-        { id: "img_dial", label: "① 文字盤全体 (Googleレンズ検索可)", onchange: "showLensOption()" },
+        { id: "img_dial", label: "① 文字盤全体 (AI型番自動解析)", onchange: "autoDetectModel(this)" },
         { id: "img_back", label: "② 裏蓋刻印・シリアル" },
         { id: "img_crown", label: "③ リューズ・ロゴ刻印" },
         { id: "img_clasp", label: "④ ブレス・バックル刻印" }
       ],
       eyewear: [
-        { id: "img_frame", label: "① 全体・フレーム構造", onchange: "showLensOption()" },
+        { id: "img_frame", label: "① 全体・フレーム構造 (AI自動解析)", onchange: "autoDetectModel(this)" },
         { id: "img_temple", label: "② ツル内側ロゴ・型番刻印" },
         { id: "img_lens", label: "③ レンズ刻印・透かしマーク" },
         { id: "img_hinge", label: "④ ヒンジ (蝶番) ・金具部" }
       ],
       apparel: [
-        { id: "img_full", label: "① 全体写真 (シルエット・縫製)", onchange: "showLensOption()" },
+        { id: "img_full", label: "① 全体写真 (AI型番自動解析)", onchange: "autoDetectModel(this)" },
         { id: "img_brand_tag", label: "② 首元/ウエスト ブランドタグ" },
         { id: "img_wash_tag", label: "③ 内側 品質表示・洗濯タグ" },
         { id: "img_detail", label: "④ ボタン/ジップ/刺繍拡大" }
       ],
       accessory: [
-        { id: "img_acc_full", label: "① 全体写真・表面仕上げ", onchange: "showLensOption()" },
+        { id: "img_acc_full", label: "① 全体写真 (AI型番自動解析)", onchange: "autoDetectModel(this)" },
         { id: "img_acc_stamp", label: "② ブランド刻印・ロゴ印字" },
         { id: "img_metal_stamp", label: "③ 素材刻印 (K18/925/ホールマーク)" },
         { id: "img_clasp_part", label: "④ 金具・留め具・フック部" }
@@ -213,19 +209,39 @@
         `).join('');
       }
 
-      const lensBox = document.getElementById('lensSearchBox');
-      if (lensBox) lensBox.classList.add('hidden');
+      document.getElementById('aiDetectStatus').classList.add('hidden');
     }
 
-    function showLensOption() {
-      const lensBox = document.getElementById('lensSearchBox');
-      if (lensBox) lensBox.classList.remove('hidden');
-    }
+    async function autoDetectModel(inputElement) {
+      if (!inputElement.files || !inputElement.files[0]) return;
 
-    function openGoogleLens() {
       const brand = document.getElementById('brandSelect').value;
-      const query = encodeURIComponent(`${brand} 型番`);
-      window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
+      const category = document.getElementById('categorySelect').value;
+      const statusBox = document.getElementById('aiDetectStatus');
+      const modelInput = document.getElementById('modelNumber');
+
+      statusBox.classList.remove('hidden');
+
+      const formData = new FormData();
+      formData.append('brand', brand);
+      formData.append('category', category);
+      formData.append('file', inputElement.files[0]);
+
+      try {
+        const response = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/auto-detect-model', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          modelInput.value = data.detected_model;
+        }
+      } catch (e) {
+        console.error("Auto detect failed", e);
+      } finally {
+        statusBox.classList.add('hidden');
+      }
     }
 
     async function runGuidedAuth() {
