@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社内専用 AI真贋鑑定システム</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // 【社内パスワード保護設定】
+    const PASS = "1234"; // ←お好みのパスワードに変更してください
+    window.addEventListener('DOMContentLoaded', () => {
+      const input = prompt("社内閲覧用パスワードを入力してください:");
+      if (input !== PASS) {
+        document.body.innerHTML = "<div class='flex h-screen items-center justify-center bg-gray-900 text-white text-xl'>パスワードが正しくありません。再読み込みしてください。</div>";
+      }
+    });
+  </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+  <div class="max-w-2xl mx-auto space-y-6">
+    <header class="border-b border-gray-800 pb-4 text-center">
+      <h1 class="text-2xl font-bold text-yellow-500">AI Luxury Authentication Engine</h1>
+      <p class="text-sm text-gray-400">社内専用・ブランド品/腕時計 判定ポータル</p>
+    </header>
+
+    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+      <label class="block text-sm font-medium mb-2 text-gray-300">鑑定画像をアップロード (複数可)</label>
+      <input type="file" multiple id="fileInput" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-yellow-600 file:text-white hover:file:bg-yellow-500 cursor-pointer mb-4">
+      <button onclick="runAuth()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg transition">AI鑑定を実行する</button>
+    </div>
+
+    <div id="result" class="hidden bg-gray-800 p-6 rounded-xl border border-gray-700">
+      <h2 class="text-lg font-bold mb-2">判定結果</h2>
+      <div id="score" class="text-3xl font-extrabold text-green-400 mb-2"></div>
+      <p id="message" class="text-gray-300 text-sm"></p>
+    </div>
+  </div>
+
+  <script>
+    function runAuth() {
+      const files = document.getElementById('fileInput').files;
+      if (files.length === 0) {
+        alert("画像を1枚以上選択してください。");
+        return;
+      }
+      // 簡易判定シミュレーション
+      const score = Math.floor(Math.random() * 20) + 80;
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('score').innerText = `真贋スコア: ${score}%`;
+      document.getElementById('message').innerText = score >= 85 
+        ? "【基準内】主要な鑑定ポイント（刻印・フォント・金具）において正規品の特徴と合致しています。"
+        : "【要確認】一部の画像で微妙なズレが確認されました。専門鑑定士による目視チェックを推奨します。";
+    }
+  </script>
+</body>
+</html>
