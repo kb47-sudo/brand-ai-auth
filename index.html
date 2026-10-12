@@ -70,7 +70,7 @@
             Googleレンズで型番を画像検索
           </button>
         </div>
-        <p class="text-xs text-gray-400">※ボタンを押すとGoogleレンズが起動し、Web上の同一商品や型番が即座に特定できます。</p>
+        <p class="text-xs text-gray-400">※ボタンを押して開いた検索窓右端の「📷マーク」をタップすると、スマホのカメラや画像から同一商品・型番を即座に検索できます。</p>
       </div>
 
       <!-- 型番・シリアル入力欄 -->
@@ -224,8 +224,8 @@
 
     function openGoogleLens() {
       const brand = document.getElementById('brandSelect').value;
-      const query = encodeURIComponent(`${brand} 型番 品番`);
-      window.open(`https://lens.google.com/search?p=${query}`, '_blank');
+      const query = encodeURIComponent(`${brand} 型番`);
+      window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
     }
 
     async function runGuidedAuth() {
