@@ -12,7 +12,7 @@
     
     <!-- ヘッダー -->
     <header class="border-b border-gray-800 pb-4 text-center">
-      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">Google Lens Direct v12.2</div>
+      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">Google Lens Direct v12.3</div>
       <h1 class="text-3xl font-extrabold text-white tracking-wide">AI Brand Authenticator Pro</h1>
       <p class="text-sm text-gray-400 mt-1">Googleレンズ直結型番特定 ＆ 厳格AI真贋・3大相場査定ポータル</p>
     </header>
@@ -50,11 +50,16 @@
     <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-2xl space-y-4">
       <h2 class="text-sm font-semibold text-gray-300">2. 指定部位写真のセット</h2>
       
-      <!-- 撮影枠エリア（直接表示） -->
-      <div id="uploadSlots" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- 撮影枠4つ -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
           <label id="slot_label_1" class="block text-xs font-bold text-yellow-500">① 全体写真 (Googleレンズ連動)</label>
           <input type="file" id="img_1" accept="image/*" onchange="triggerLensSearch()" class="block w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-200 hover:file:bg-gray-700 cursor-pointer">
         </div>
         <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
-          <label id="slot_label_2" class="block text-
+          <label id="slot_label_2" class="block text-xs font-bold text-yellow-500">② ブランドロゴ刻印 (接写)</label>
+          <input type="file" id="img_2" accept="image/*" class="block w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-200 hover:file:bg-gray-700 cursor-pointer">
+        </div>
+        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
+          <label id="slot_label_3" class="block text-xs font-bold text-yellow-500">③ シリアル・型番印字</label>
+          <input type="file" id="img_3" accept="image/*" class="block w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:
