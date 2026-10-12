@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社内専用 プロ仕様AI真贋判定・ネット型番特定ポータル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    const PASS = "1234";
+    window.addEventListener('DOMContentLoaded', () => {
+      const input = prompt("社内閲覧用パスワードを入力してください:");
+      if (input !== PASS) {
+        document.body.innerHTML = "<div class='flex h-screen items-center justify-center bg-gray-900 text-white text-xl'>アクセス権限がありません。</div>";
+      }
+    });
+  </script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-4 sm:p-8">
+  <div class="max-w-3xl mx-auto space-y-6">
+    
+    <!-- ヘッダー -->
+    <header class="border-b border-gray-800 pb-4 text-center">
+      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">Web Lens Search & Auth v10.0</div>
+      <h1 class="text-3xl font-extrabold text-white tracking-wide">AI Brand Authenticator Pro</h1>
+      <p class="text-sm text-gray-400 mt-1">Googleレンズ型番検索 ＆ 厳格AI真贋・3大相場査定ポータル</p>
+    </header>
+
+    <!-- 1. 基本情報 -->
+    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-2xl space-y-4">
+      <h2 class="text-sm font-semibold text-gray-300">1. 商品基本情報</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">ブランド選択</label>
+          <select id="brandSelect" class="w-full bg-gray-950 border border-gray-800 text-sm rounded-xl p-3 text-gray-200 focus:outline-none focus:border-yellow-500">
+            <option value="Louis Vuitton">ルイ・ヴィトン (Louis Vuitton)</option>
+            <option value="CHANEL">シャネル (CHANEL)</option>
+            <option value="HERMES">エルメス (HERMÈS)</option>
+            <option value="ROLEX">ロレックス (ROLEX)</option>
+            <option value="GUCCI">グッチ (GUCCI)</option>
+            <option value="PRADA">プラダ (PRADA)</option>
+            <option value="OTHER">その他ブランド</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">品目カテゴリ</label>
+          <select id="categorySelect" onchange="switchCategoryUI()" class="w-full bg-gray-950 border border-gray-800 text-sm rounded-xl p-3 text-gray-200 focus:outline-none focus:border-yellow-500">
+            <option value="bag">バッグ・財布</option>
+            <option value="watch">腕時計</option>
+            <option value="eyewear">サングラス・メガネ</option>
+            <option value="apparel">服・アパレル</option>
+            <option value="accessory">小物・アクセサリー</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 画像アップロード ＆ Googleレンズ連携 -->
+    <div class="bg-gray
