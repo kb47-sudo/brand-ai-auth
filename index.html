@@ -12,7 +12,7 @@
     
     <!-- ヘッダー -->
     <header class="border-b border-gray-800 pb-4 text-center">
-      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">One-Stop AI Valuation v13.0</div>
+      <div class="inline-block bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full mb-2">One-Stop AI Valuation v13.1</div>
       <h1 class="text-3xl font-extrabold text-white tracking-wide">AI Brand Authenticator Pro</h1>
       <p class="text-sm text-gray-400 mt-1">撮影・選択だけでAI即時真贋 ＆ 3大相場一括算出ポータル</p>
     </header>
@@ -98,6 +98,12 @@
             <span class="text-xs text-gray-400 block">対象ブランド</span>
             <span id="reportBrand" class="text-sm font-bold text-gray-200"></span>
           </div>
+        </div>
+
+        <!-- 特定されたモデル・型番枠 -->
+        <div class="bg-gray-950 p-4 rounded-xl border border-yellow-500/30 flex justify-between items-center">
+          <span class="text-xs text-yellow-400 font-bold block">🔍 AI特定モデル名・型番</span>
+          <span id="reportDetectedModel" class="text-base font-black text-yellow-400"></span>
         </div>
 
         <div class="flex items-center justify-between border-b border-gray-800 pb-4">
@@ -261,6 +267,7 @@
 
         document.getElementById('reportDate').innerText = `発行日: ${new Date().toLocaleDateString('ja-JP')}`;
         document.getElementById('reportBrand').innerText = brand;
+        document.getElementById('reportDetectedModel').innerText = data.detected_model || "未特定";
         document.getElementById('scoreText').innerText = `${data.overall_score}%`;
         
         document.getElementById('priceBuyStore').innerText = data.market_prices.buy_store;
@@ -322,7 +329,7 @@
       if (!lastResultData) return;
       const csvContent = "data:text/csv;charset=utf-8," 
         + "日時,ブランド,型番,シリアル,スコア,判定,買取店相場,フリマ相場,オークション相場\n"
-        + `${new Date().toLocaleString()},${lastResultData.brand},${lastResultData.modelNumber || '-'},${lastResultData.serialNumber || '-'},${lastResultData.overall_score}%,${lastResultData.judgment},${lastResultData.market_prices.buy_store},${lastResultData.market_prices.fleamarket},${lastResultData.market_prices.auction}\n`;
+        + `${new Date().toLocaleString()},${lastResultData.brand},${lastResultData.detected_model || '-'},${lastResultData.serialNumber || '-'},${lastResultData.overall_score}%,${lastResultData.judgment},${lastResultData.market_prices.buy_store},${lastResultData.market_prices.fleamarket},${lastResultData.market_prices.auction}\n`;
       
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
