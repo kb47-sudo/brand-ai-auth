@@ -11,6 +11,7 @@
       --accent-color: #f59e0b;
       --danger-color: #ef4444;
       --success-color: #10b981;
+      --unchecked-color: #6b7280;
       --text-color: #f3f4f6;
       --text-sub: #9ca3af;
       --border-color: #1f2937;
@@ -269,6 +270,7 @@
     }
     .pass-badge { color: var(--success-color); font-weight: bold; }
     .fail-badge { color: var(--danger-color); font-weight: bold; }
+    .unchecked-badge { color: var(--unchecked-color); font-weight: normal; }
   </style>
 </head>
 <body>
@@ -571,9 +573,20 @@
         data.details.forEach(item => {
           const div = document.createElement('div');
           div.className = 'detail-item';
+          
+          let statusHtml = '';
+          const st = item.status || (item.pass ? 'PASS' : 'FAIL');
+          if (st === 'PASS') {
+            statusHtml = '<span class="pass-badge">✓ 一致 / 基準内</span>';
+          } else if (st === 'FAIL') {
+            statusHtml = '<span class="fail-badge">× 不一致 / 異変あり</span>';
+          } else {
+            statusHtml = '<span class="unchecked-badge">- 未確認 / 画像なし</span>';
+          }
+
           div.innerHTML = `
             <span>${item.name}</span>
-            <span class="${item.pass ? 'pass-badge' : 'fail-badge'}">${item.pass ? '✓ 一致 / 基準内' : '× 不一致 / 異変あり'}</span>
+            ${statusHtml}
           `;
           detailsDiv.appendChild(div);
         });
