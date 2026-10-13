@@ -154,19 +154,47 @@
 
     .loading-box {
       text-align: center;
-      padding: 24px;
+      padding: 24px 16px;
       display: none;
     }
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border: 4px solid rgba(245, 158, 11, 0.2);
       border-top-color: var(--accent-color);
       border-radius: 50%;
       animation: spin 1s infinite linear;
-      margin: 0 auto 12px;
+      margin: 0 auto 16px;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .progress-bar-bg {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      margin: 12px 0 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #10b981);
+      transition: width 0.4s ease;
+    }
+    .progress-status-text {
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+    .time-counter-text {
+      font-size: 0.8rem;
+      color: var(--accent-color);
+      margin-top: 6px;
+      font-weight: 600;
+    }
 
     .result-card { display: none; }
     
@@ -318,288 +346,4 @@
         <div id="preview1" class="preview-container" style="display:none;">
           <img id="img-preview1" src="" alt="縮小表示">
           <span id="name-preview1" class="file-name"></span>
-          <button type="button" class="btn-clear" onclick="clearFile(1)">✕ 削除</button>
-        </div>
-      </div>
-
-      <div class="photo-upload-box">
-        <label id="label2">② 全体写真（裏面・背面ポケット等）</label>
-        <div class="file-input-wrapper">
-          <label for="photo2" class="btn-select">ファイルを選択</label>
-          <input type="file" id="photo2" accept="image/*" onchange="handleFileSelect(2)">
-        </div>
-        <div id="preview2" class="preview-container" style="display:none;">
-          <img id="img-preview2" src="" alt="縮小表示">
-          <span id="name-preview2" class="file-name"></span>
-          <button type="button" class="btn-clear" onclick="clearFile(2)">✕ 削除</button>
-        </div>
-      </div>
-
-      <div class="photo-upload-box">
-        <label id="label3">③ ブランドロゴ刻印（接写）</label>
-        <div class="file-input-wrapper">
-          <label for="photo3" class="btn-select">ファイルを選択</label>
-          <input type="file" id="photo3" accept="image/*" onchange="handleFileSelect(3)">
-        </div>
-        <div id="preview3" class="preview-container" style="display:none;">
-          <img id="img-preview3" src="" alt="縮小表示">
-          <span id="name-preview3" class="file-name"></span>
-          <button type="button" class="btn-clear" onclick="clearFile(3)">✕ 削除</button>
-        </div>
-      </div>
-
-      <div class="photo-upload-box">
-        <label id="label4">④ シリアル・型番印字</label>
-        <div class="file-input-wrapper">
-          <label for="photo4" class="btn-select">ファイルを選択</label>
-          <input type="file" id="photo4" accept="image/*" onchange="handleFileSelect(4)">
-        </div>
-        <div id="preview4" class="preview-container" style="display:none;">
-          <img id="img-preview4" src="" alt="縮小表示">
-          <span id="name-preview4" class="file-name"></span>
-          <button type="button" class="btn-clear" onclick="clearFile(4)">✕ 削除</button>
-        </div>
-      </div>
-
-      <div class="photo-upload-box">
-        <label id="label5">⑤ 金具・ビス・ファスナー</label>
-        <div class="file-input-wrapper">
-          <label for="photo5" class="btn-select">ファイルを選択</label>
-          <input type="file" id="photo5" accept="image/*" onchange="handleFileSelect(5)">
-        </div>
-        <div id="preview5" class="preview-container" style="display:none;">
-          <img id="img-preview5" src="" alt="縮小表示">
-          <span id="name-preview5" class="file-name"></span>
-          <button type="button" class="btn-clear" onclick="clearFile(5)">✕ 削除</button>
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-top:12px;">
-        <label style="color:var(--text-sub);">手入力補足型番（空欄でAI完全自動判定）</label>
-        <input type="text" id="modelNumber" placeholder="例: 16233G, M44336, H0940 等">
-      </div>
-
-      <button type="submit" class="btn-submit">⚡ AI自動識別 ＆ 3大相場査定を実行</button>
-    </form>
-  </div>
-
-  <div id="loadingBox" class="card loading-box">
-    <div class="spinner"></div>
-    <div style="font-size: 0.85rem; color: var(--accent-color);">多重AIエンジンが解析中...<br>ミクロ異変検証・刻印照合・3大相場算出中</div>
-  </div>
-
-  <div id="resultCard" class="card result-card">
-    <div class="model-tag-large">
-      <div class="model-tag-title">🔍 AI自動識別 モデル名・特定型番</div>
-      <div class="model-tag-content" id="resDetectedModel">----</div>
-    </div>
-
-    <div class="score-header">
-      <div>
-        <span style="font-size:0.75rem; color:var(--text-sub);">総合判定ランク</span>
-        <div class="score-title" id="resJudgment">【 基準内 】</div>
-      </div>
-      <div style="text-align:right;">
-        <span style="font-size:0.75rem; color:var(--text-sub);">AI一致率スコア</span>
-        <div class="score-val" id="resScore">95.0%</div>
-      </div>
-    </div>
-
-    <div class="msg-box" id="resMessage">
-      --
-    </div>
-
-    <div id="warningBox" class="warning-box">
-      <div class="warning-title">⚠️ 検知された違和感・懸念部位</div>
-      <div id="resSuspiciousPoints">--</div>
-    </div>
-
-    <div class="section-title">推定市場流通相場（買取店・フリマ・オークション）</div>
-    <div class="price-card">
-      <span class="price-label">🏢 買取店相場 (仕入れ目安)</span>
-      <span class="price-value" id="resBuyStore">-- 円</span>
-    </div>
-    <div class="price-card">
-      <span class="price-label">📱 フリマ相場 (メルカリ等)</span>
-      <span class="price-value" id="resFleamarket">-- 円</span>
-    </div>
-    <div class="price-card">
-      <span class="price-label">🔨 オークション (ヤフオク等)</span>
-      <span class="price-value" id="resAuction">-- 円</span>
-    </div>
-
-    <div class="section-title" style="margin-top:16px;">12大多角分析・個別チェック項目</div>
-    <div id="detailsContainer"></div>
-  </div>
-</div>
-
-<script>
-  const categoryLabels = {
-    "バッグ": [
-      "① 全体写真（表面）",
-      "② 全体写真（裏面・背面ポケット等）",
-      "③ ブランドロゴ刻印（接写）",
-      "④ シリアル・製造番号印字",
-      "⑤ 金具・ビス・ファスナー"
-    ],
-    "時計": [
-      "① 文字盤・正面全体",
-      "② 裏蓋・裏蓋刻印（ケースバック）",
-      "③ 文字盤ロゴ・ルーレット刻印（接写）",
-      "④ シリアル・Ref型番刻印（ケース側/保証書）",
-      "⑤ ブレス・バックル・王冠刻印"
-    ],
-    "財布・小物": [
-      "① 全体写真（表面）",
-      "② 全体写真（内側・コインケース開口部）",
-      "③ ブランドロゴ刻印（接写）",
-      "④ シリアル・製造番号印字",
-      "⑤ 金具・スナップボタン・ファスナー"
-    ],
-    "アパレル・靴": [
-      "① 全体写真（正面）",
-      "② 全体写真（背面・ソール裏等）",
-      "③ ブランドタグ・ロゴ刺繍（接写）",
-      "④ 品質表示タグ・サイズ・シリアル印字",
-      "⑤ ボタン・ジッパー・金属パーツ"
-    ]
-  };
-
-  function updatePhotoLabels() {
-    const cat = document.getElementById('category').value;
-    const labels = categoryLabels[cat] || categoryLabels["バッグ"];
-    for (let i = 1; i <= 5; i++) {
-      document.getElementById(`label${i}`).textContent = labels[i - 1];
-    }
-  }
-
-  updatePhotoLabels();
-
-  function handleFileSelect(index) {
-    const input = document.getElementById(`photo${index}`);
-    const previewDiv = document.getElementById(`preview${index}`);
-    const imgPreview = document.getElementById(`img-preview${index}`);
-    const namePreview = document.getElementById(`name-preview${index}`);
-
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      namePreview.textContent = file.name;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        imgPreview.src = e.target.result;
-        previewDiv.style.display = 'flex';
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function clearFile(index) {
-    const input = document.getElementById(`photo${index}`);
-    const previewDiv = document.getElementById(`preview${index}`);
-    const imgPreview = document.getElementById(`img-preview${index}`);
-    const namePreview = document.getElementById(`name-preview${index}`);
-
-    input.value = '';
-    imgPreview.src = '';
-    namePreview.textContent = '';
-    previewDiv.style.display = 'none';
-  }
-
-  document.getElementById('authForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const loadingBox = document.getElementById('loadingBox');
-    const resultCard = document.getElementById('resultCard');
-
-    loadingBox.style.display = 'block';
-    resultCard.style.display = 'none';
-
-    try {
-      const formData = new FormData();
-      formData.append('brand', document.getElementById('brand').value);
-      formData.append('category', document.getElementById('category').value);
-      formData.append('model_number', document.getElementById('modelNumber').value || '');
-
-      let fileCount = 0;
-      for (let i = 1; i <= 5; i++) {
-        const input = document.getElementById(`photo${i}`);
-        if (input.files && input.files[0]) {
-          formData.append('files', input.files[0]);
-          fileCount++;
-        }
-      }
-
-      if (fileCount === 0) {
-        alert('部位写真を1枚以上アップロードしてください。');
-        loadingBox.style.display = 'none';
-        return;
-      }
-
-      const response = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/authenticate', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error(`サーバーエラー (HTTP status: ${response.status})`);
-      }
-
-      const data = await response.json();
-
-      document.getElementById('resDetectedModel').textContent = data.detected_model || '解析一時保留';
-      document.getElementById('resJudgment').textContent = `【 ${data.judgment || '判定結果取得'} 】`;
-      document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
-      document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
-
-      const warningBox = document.getElementById('warningBox');
-      const suspiciousDiv = document.getElementById('resSuspiciousPoints');
-      if (data.suspicious_points && data.suspicious_points.length > 0) {
-        suspiciousDiv.innerHTML = data.suspicious_points.map(pt => `・${pt}`).join('<br>');
-        warningBox.style.display = 'block';
-      } else {
-        warningBox.style.display = 'none';
-      }
-
-      if (data.market_prices) {
-        document.getElementById('resBuyStore').textContent = data.market_prices.buy_store || '-- 円';
-        document.getElementById('resFleamarket').textContent = data.market_prices.fleamarket || '-- 円';
-        document.getElementById('resAuction').textContent = data.market_prices.auction || '-- 円';
-      }
-
-      const detailsDiv = document.getElementById('detailsContainer');
-      detailsDiv.innerHTML = '';
-      if (data.details && data.details.length > 0) {
-        data.details.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'detail-item';
-          
-          let statusHtml = '';
-          const st = item.status || (item.pass ? 'PASS' : 'FAIL');
-          if (st === 'PASS') {
-            statusHtml = '<span class="pass-badge">✓ 一致 / 基準内</span>';
-          } else if (st === 'FAIL') {
-            statusHtml = '<span class="fail-badge">× 不一致 / 異変あり</span>';
-          } else {
-            statusHtml = '<span class="unchecked-badge">- 未確認 / 画像なし</span>';
-          }
-
-          div.innerHTML = `
-            <span>${item.name}</span>
-            ${statusHtml}
-          `;
-          detailsDiv.appendChild(div);
-        });
-      }
-
-      resultCard.style.display = 'block';
-    } catch (err) {
-      alert(`通信エラーが発生しました: (${err.message})`);
-    } finally {
-      loadingBox.style.display = 'none';
-    }
-  });
-</script>
-
-</body>
-</html>
+          <button type="button" class="btn-clear" onclick="clearFile(
