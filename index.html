@@ -502,9 +502,7 @@
     const labels = categoryLabels[cat] || categoryLabels["バッグ"];
     for (let i = 1; i <= 5; i++) {
       const lbl = document.getElementById(`label${i}`);
-      if (lbl) {
-        lbl.textContent = labels[i - 1];
-      }
+      if (lbl) lbl.textContent = labels[i - 1];
     }
   }
 
@@ -540,6 +538,7 @@
   }
 
   let timerInterval = null;
+  let pollInterval = null;
 
   document.addEventListener("DOMContentLoaded", function() {
     updatePhotoLabels();
@@ -559,9 +558,10 @@
         resultCard.style.display = 'none';
 
         let secondsElapsed = 0;
-        progressBar.style.width = '5%';
+        progressBar.style.width = '10%';
 
         if (timerInterval) clearInterval(timerInterval);
+        if (pollInterval) clearInterval(pollInterval);
 
         timerInterval = setInterval(() => {
           secondsElapsed++;
@@ -604,71 +604,90 @@
             return;
           }
 
-          const response = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/authenticate', {
+          // 1. ジョブ発行（即時レスポンスにより504防止）
+          const initRes = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/authenticate', {
             method: 'POST',
             body: formData
           });
 
-          clearInterval(timerInterval);
-          progressBar.style.width = '100%';
-
-          if (!response.ok) {
-            throw new Error(`サーバーエラー (HTTP status: ${response.status})`);
+          if (!initRes.ok) {
+            throw new Error(`サーバーエラー (HTTP status: ${initRes.status})`);
           }
 
-          const data = await response.json();
+          const initData = await initRes.json();
+          const jobId = initData.job_id;
 
-          document.getElementById('resDetectedModel').textContent = data.detected_model || '解析一時保留';
-          document.getElementById('resJudgment').textContent = `【 ${data.judgment || '判定結果取得'} 】`;
-          document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
-          document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
+          // 2. 結果が出るまで3秒ごとに裏側で問い合わせ（ポーリング）
+          pollInterval = setInterval(async () => {
+            try {
+              const resCheck = await fetch(`https://brand-ai-backend-1.onrender.com/api/v1/result/${jobId}`);
+              if (resCheck.ok) {
+                const jobStatus = await resCheck.json();
+                if (jobStatus.status === 'completed') {
+                  clearInterval(pollInterval);
+                  clearInterval(timerInterval);
+                  progressBar.style.width = '100%';
 
-          const warningBox = document.getElementById('warningBox');
-          const suspiciousDiv = document.getElementById('resSuspiciousPoints');
-          if (data.suspicious_points && data.suspicious_points.length > 0) {
-            suspiciousDiv.innerHTML = data.suspicious_points.map(pt => `・${pt}`).join('<br>');
-            warningBox.style.display = 'block';
-          } else {
-            warningBox.style.display = 'none';
-          }
+                  const data = jobStatus.data;
+                  document.getElementById('resDetectedModel').textContent = data.detected_model || '特定不能';
+                  document.getElementById('resJudgment').textContent = `【 ${data.judgment || '判定取得'} 】`;
+                  document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
+                  document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
 
-          if (data.market_prices) {
-            document.getElementById('resBuyStore').textContent = data.market_prices.buy_store || '-- 円';
-            document.getElementById('resFleamarket').textContent = data.market_prices.fleamarket || '-- 円';
-            document.getElementById('resAuction').textContent = data.market_prices.auction || '-- 円';
-          }
+                  const warningBox = document.getElementById('warningBox');
+                  const suspiciousDiv = document.getElementById('resSuspiciousPoints');
+                  if (data.suspicious_points && data.suspicious_points.length > 0) {
+                    suspiciousDiv.innerHTML = data.suspicious_points.map(pt => `・${pt}`).join('<br>');
+                    warningBox.style.display = 'block';
+                  } else {
+                    warningBox.style.display = 'none';
+                  }
 
-          const detailsDiv = document.getElementById('detailsContainer');
-          detailsDiv.innerHTML = '';
-          if (data.details && data.details.length > 0) {
-            data.details.forEach(item => {
-              const div = document.createElement('div');
-              div.className = 'detail-item';
-              
-              let statusHtml = '';
-              const st = item.status || (item.pass ? 'PASS' : 'FAIL');
-              if (st === 'PASS') {
-                statusHtml = '<span class="pass-badge">✓ 一致 / 基準内</span>';
-              } else if (st === 'FAIL') {
-                statusHtml = '<span class="fail-badge">× 不一致 / 異変あり</span>';
-              } else {
-                statusHtml = '<span class="unchecked-badge">- 未確認 / 画像なし</span>';
+                  if (data.market_prices) {
+                    document.getElementById('resBuyStore').textContent = data.market_prices.buy_store || '-- 円';
+                    document.getElementById('resFleamarket').textContent = data.market_prices.fleamarket || '-- 円';
+                    document.getElementById('resAuction').textContent = data.market_prices.auction || '-- 円';
+                  }
+
+                  const detailsDiv = document.getElementById('detailsContainer');
+                  detailsDiv.innerHTML = '';
+                  if (data.details && data.details.length > 0) {
+                    data.details.forEach(item => {
+                      const div = document.createElement('div');
+                      div.className = 'detail-item';
+                      let statusHtml = '';
+                      const st = item.status || (item.pass ? 'PASS' : 'FAIL');
+                      if (st === 'PASS') {
+                        statusHtml = '<span class="pass-badge">✓ 一致 / 基準内</span>';
+                      } else if (st === 'FAIL') {
+                        statusHtml = '<span class="fail-badge">× 不一致 / 異変あり</span>';
+                      } else {
+                        statusHtml = '<span class="unchecked-badge">- 未確認 / 画像なし</span>';
+                      }
+                      div.innerHTML = `<span>${item.name}</span>${statusHtml}`;
+                      detailsDiv.appendChild(div);
+                    });
+                  }
+
+                  loadingBox.style.display = 'none';
+                  resultCard.style.display = 'block';
+                } else if (jobStatus.status === 'error') {
+                  clearInterval(pollInterval);
+                  clearInterval(timerInterval);
+                  loadingBox.style.display = 'none';
+                  alert(`解析エラー: ${jobStatus.message}`);
+                }
               }
+            } catch (pollErr) {
+              // 問い合わせエラーはサイレントで次回リトライ
+            }
+          }, 3000);
 
-              div.innerHTML = `
-                <span>${item.name}</span>
-                ${statusHtml}
-              `;
-              detailsDiv.appendChild(div);
-            });
-          }
-
-          resultCard.style.display = 'block';
         } catch (err) {
-          alert(`通信エラーが発生しました: (${err.message})`);
-        } finally {
           clearInterval(timerInterval);
+          if (pollInterval) clearInterval(pollInterval);
           loadingBox.style.display = 'none';
+          alert(`通信エラーが発生しました: (${err.message})`);
         }
       });
     }
