@@ -68,7 +68,7 @@
       margin-bottom: 6px;
       color: var(--accent-color);
     }
-    select, input[type="text"], input[type="password"] {
+    select, input[type="text"] {
       width: 100%;
       padding: 10px;
       background: #0f172a;
@@ -166,21 +166,28 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* デザイン復元用のスタイル */
     .result-card { display: none; }
     
-    .model-tag {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.85rem;
+    /* モデル名巨大表示枠 */
+    .model-tag-large {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .model-tag-title {
+      font-size: 0.75rem;
       color: var(--accent-color);
       font-weight: bold;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .model-tag-content {
+      font-size: 1.15rem;
+      color: #ffffff;
+      font-weight: 800;
+      line-height: 1.4;
+      word-break: break-word;
     }
 
     .score-header {
@@ -255,12 +262,6 @@
 
   <div class="card">
     <form id="authForm">
-      <!-- 簡易保護パスワード -->
-      <div class="form-group">
-        <label>アクセスキー（パスワード）</label>
-        <input type="password" id="passkey" placeholder="パスワードを入力" required>
-      </div>
-
       <div class="form-group">
         <label>対象ブランド</label>
         <select id="brand" required>
@@ -345,7 +346,7 @@
 
       <div class="form-group" style="margin-top:12px;">
         <label style="color:var(--text-sub);">手入力補足型番（空欄でAI完全自動判定）</label>
-        <input type="text" id="modelNumber" placeholder="例: M61864, 16233G 等">
+        <input type="text" id="modelNumber" placeholder="例: M61864, M44861, 16233G 等">
       </div>
 
       <button type="submit" class="btn-submit">⚡ AI自動識別 ＆ 3大相場査定を実行</button>
@@ -358,8 +359,9 @@
   </div>
 
   <div id="resultCard" class="card result-card">
-    <div class="model-tag" id="resDetectedModel">
-      🔍 AI自動識別モデル名・型番: ----
+    <div class="model-tag-large">
+      <div class="model-tag-title">🔍 AI自動識別 モデル名・特定型番</div>
+      <div class="model-tag-content" id="resDetectedModel">----</div>
     </div>
 
     <div class="score-header">
@@ -431,12 +433,6 @@
   document.getElementById('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const passkey = document.getElementById('passkey').value;
-    if (!passkey) {
-      alert('アクセスキー（パスワード）を入力してください。');
-      return;
-    }
-
     const formData = new FormData();
     formData.append('brand', document.getElementById('brand').value);
     formData.append('category', document.getElementById('category').value);
@@ -471,7 +467,7 @@
 
       const data = await response.json();
 
-      document.getElementById('resDetectedModel').innerHTML = `🔍 AI自動識別モデル名・型番: <b>${data.detected_model || '解析一時保留'}</b>`;
+      document.getElementById('resDetectedModel').textContent = data.detected_model || '解析一時保留';
       document.getElementById('resJudgment').textContent = `【 ${data.judgment || '判定結果取得'} 】`;
       document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
       document.getElementById('resMessage').textContent = data.message || '';
