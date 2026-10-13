@@ -218,7 +218,6 @@
       margin-bottom: 12px;
     }
 
-    /* 違和感・不審点表示枠 */
     .warning-box {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.4);
@@ -408,7 +407,6 @@
       --
     </div>
 
-    <!-- ⚠️ 異変・不審箇所の提示エリア -->
     <div id="warningBox" class="warning-box">
       <div class="warning-title">⚠️ 検知された違和感・懸念部位</div>
       <div id="resSuspiciousPoints">--</div>
@@ -506,40 +504,6 @@
     previewDiv.style.display = 'none';
   }
 
-  async function compressImage(file) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 600;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-        }, 'image/jpeg', 0.75);
-      };
-    });
-  }
-
   document.getElementById('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -555,8 +519,8 @@
     for (let i = 1; i <= 5; i++) {
       const input = document.getElementById(`photo${i}`);
       if (input.files && input.files[0]) {
-        const compressed = await compressImage(input.files[0]);
-        formData.append('files', compressed);
+        // 重いクライアント側圧縮処理を廃止し、即座に送信
+        formData.append('files', input.files[0]);
         fileCount++;
       }
     }
@@ -584,7 +548,6 @@
       document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
       document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
 
-      // 違和感・懸念箇所の表示ロジック
       const warningBox = document.getElementById('warningBox');
       const suspiciousDiv = document.getElementById('resSuspiciousPoints');
       if (data.suspicious_points && data.suspicious_points.length > 0) {
