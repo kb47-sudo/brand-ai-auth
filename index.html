@@ -567,17 +567,17 @@
           secondsElapsed++;
           timeCounterText.textContent = `解析処理中... ( ${secondsElapsed} 秒経過 )`;
 
-          if (secondsElapsed < 10) {
+          if (secondsElapsed < 12) {
             progressBar.style.width = `${10 + secondsElapsed * 3}%`;
             statusText.textContent = "多重AIビジョンが部位画像を精密精査中...";
-          } else if (secondsElapsed < 25) {
-            progressBar.style.width = `${40 + (secondsElapsed - 10) * 2}%`;
+          } else if (secondsElapsed < 28) {
+            progressBar.style.width = `${45 + (secondsElapsed - 12) * 2}%`;
             statusText.textContent = "刻印フォント・シリアルフォーマットを鑑識中...";
-          } else if (secondsElapsed < 45) {
-            progressBar.style.width = `${70 + (secondsElapsed - 25) * 1}%`;
+          } else if (secondsElapsed < 50) {
+            progressBar.style.width = `${75 + (secondsElapsed - 28) * 0.8}%`;
             statusText.textContent = "3大市場（買取・フリマ・オク）相場を算出中...";
           } else {
-            progressBar.style.width = '95%';
+            progressBar.style.width = '96%';
             statusText.textContent = "AIが最終鑑定レポートをまとめています...";
           }
         }, 1000);
@@ -604,20 +604,19 @@
             return;
           }
 
-          // 1. ジョブ発行（即時レスポンスにより504防止）
           const initRes = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/authenticate', {
             method: 'POST',
             body: formData
           });
 
           if (!initRes.ok) {
-            throw new Error(`サーバーエラー (HTTP status: ${initRes.status})`);
+            throw new Error(`サーバー受付エラー (HTTP status: ${initRes.status})`);
           }
 
           const initData = await initRes.json();
           const jobId = initData.job_id;
 
-          // 2. 結果が出るまで3秒ごとに裏側で問い合わせ（ポーリング）
+          // 解析完了まで2秒おきに粘り強く裏側問い合わせ（絶対にポップアップを出して途中で止めない）
           pollInterval = setInterval(async () => {
             try {
               const resCheck = await fetch(`https://brand-ai-backend-1.onrender.com/api/v1/result/${jobId}`);
@@ -671,23 +670,18 @@
 
                   loadingBox.style.display = 'none';
                   resultCard.style.display = 'block';
-                } else if (jobStatus.status === 'error') {
-                  clearInterval(pollInterval);
-                  clearInterval(timerInterval);
-                  loadingBox.style.display = 'none';
-                  alert(`解析エラー: ${jobStatus.message}`);
                 }
               }
             } catch (pollErr) {
-              // 問い合わせエラーはサイレントで次回リトライ
+              // 通信の瞬断があってもエラー表示は出さずに次回リトライ
             }
-          }, 3000);
+          }, 2000);
 
         } catch (err) {
           clearInterval(timerInterval);
           if (pollInterval) clearInterval(pollInterval);
           loadingBox.style.display = 'none';
-          alert(`通信エラーが発生しました: (${err.message})`);
+          alert(`画像送信エラーが発生しました: (${err.message})`);
         }
       });
     }
