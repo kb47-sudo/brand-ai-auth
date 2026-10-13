@@ -507,38 +507,40 @@
   document.getElementById('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    document.getElementById('loadingBox').style.display = 'block';
-    document.getElementById('resultCard').style.display = 'none';
+    const loadingBox = document.getElementById('loadingBox');
+    const resultCard = document.getElementById('resultCard');
 
-    const formData = new FormData();
-    formData.append('brand', document.getElementById('brand').value);
-    formData.append('category', document.getElementById('category').value);
-    formData.append('model_number', document.getElementById('modelNumber').value || '');
-
-    let fileCount = 0;
-    for (let i = 1; i <= 5; i++) {
-      const input = document.getElementById(`photo${i}`);
-      if (input.files && input.files[0]) {
-        // 重いクライアント側圧縮処理を廃止し、即座に送信
-        formData.append('files', input.files[0]);
-        fileCount++;
-      }
-    }
-
-    if (fileCount === 0) {
-      alert('部位写真を1枚以上アップロードしてください。');
-      document.getElementById('loadingBox').style.display = 'none';
-      return;
-    }
+    loadingBox.style.display = 'block';
+    resultCard.style.display = 'none';
 
     try {
+      const formData = new FormData();
+      formData.append('brand', document.getElementById('brand').value);
+      formData.append('category', document.getElementById('category').value);
+      formData.append('model_number', document.getElementById('modelNumber').value || '');
+
+      let fileCount = 0;
+      for (let i = 1; i <= 5; i++) {
+        const input = document.getElementById(`photo${i}`);
+        if (input.files && input.files[0]) {
+          formData.append('files', input.files[0]);
+          fileCount++;
+        }
+      }
+
+      if (fileCount === 0) {
+        alert('部位写真を1枚以上アップロードしてください。');
+        loadingBox.style.display = 'none';
+        return;
+      }
+
       const response = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/authenticate', {
         method: 'POST',
         body: formData
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`サーバーエラー (HTTP status: ${response.status})`);
       }
 
       const data = await response.json();
@@ -577,11 +579,11 @@
         });
       }
 
-      document.getElementById('resultCard').style.display = 'block';
+      resultCard.style.display = 'block';
     } catch (err) {
-      alert(`通信エラーが発生しました。時間を置いて再度お試しください。(${err.message})`);
+      alert(`通信エラーが発生しました: (${err.message})`);
     } finally {
-      document.getElementById('loadingBox').style.display = 'none';
+      loadingBox.style.display = 'none';
     }
   });
 </script>
