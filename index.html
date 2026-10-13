@@ -87,7 +87,7 @@
       padding: 10px;
       margin-bottom: 10px;
     }
-    .photo-upload-box label {
+    .photo-upload-box label.box-title {
       font-size: 0.8rem;
       color: var(--text-sub);
       margin-bottom: 6px;
@@ -342,7 +342,7 @@
       </div>
 
       <div class="photo-upload-box">
-        <label id="label1">① 全体写真（表面）</label>
+        <label class="box-title" id="label1">① 全体写真（表面）</label>
         <div>
           <label for="photo1" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo1" accept="image/*" onchange="handleFileSelect(1)">
@@ -355,7 +355,7 @@
       </div>
 
       <div class="photo-upload-box">
-        <label id="label2">② 全体写真（裏面・背面ポケット等）</label>
+        <label class="box-title" id="label2">② 全体写真（裏面・背面ポケット等）</label>
         <div>
           <label for="photo2" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo2" accept="image/*" onchange="handleFileSelect(2)">
@@ -368,7 +368,7 @@
       </div>
 
       <div class="photo-upload-box">
-        <label id="label3">③ ブランドロゴ刻印（接写）</label>
+        <label class="box-title" id="label3">③ ブランドロゴ刻印（接写）</label>
         <div>
           <label for="photo3" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo3" accept="image/*" onchange="handleFileSelect(3)">
@@ -381,7 +381,7 @@
       </div>
 
       <div class="photo-upload-box">
-        <label id="label4">④ シリアル・型番印字</label>
+        <label class="box-title" id="label4">④ シリアル・型番印字</label>
         <div>
           <label for="photo4" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo4" accept="image/*" onchange="handleFileSelect(4)">
@@ -394,7 +394,7 @@
       </div>
 
       <div class="photo-upload-box">
-        <label id="label5">⑤ 金具・ビス・ファスナー</label>
+        <label class="box-title" id="label5">⑤ 金具・ビス・ファスナー</label>
         <div>
           <label for="photo5" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo5" accept="image/*" onchange="handleFileSelect(5)">
@@ -520,12 +520,13 @@
       const file = input.files[0];
       if (namePreview) namePreview.textContent = file.name;
       
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        if (imgPreview) imgPreview.src = e.target.result;
+      try {
+        const objectUrl = URL.createObjectURL(file);
+        if (imgPreview) imgPreview.src = objectUrl;
         if (previewDiv) previewDiv.style.display = 'flex';
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error("Preview error:", err);
+      }
     }
   }
 
@@ -619,4 +620,89 @@
             body: formData
           });
 
-          if
+          if (!initRes.ok) {
+            throw new Error('サーバー受付エラー (HTTP status: ' + initRes.status + ')');
+          }
+
+          const initData = await initRes.json();
+          const jobId = initData.job_id;
+
+          pollInterval = setInterval(async function() {
+            try {
+              const resCheck = await fetch('https://brand-ai-backend-1.onrender.com/api/v1/result/' + jobId);
+              if (resCheck.ok) {
+                const jobStatus = await resCheck.json();
+                if (jobStatus.status === 'completed') {
+                  clearInterval(pollInterval);
+                  clearInterval(timerInterval);
+                  progressBar.style.width = '100%';
+
+                  const data = jobStatus.data;
+                  document.getElementById('resDetectedModel').textContent = data.detected_model || '特定不能';
+                  document.getElementById('resJudgment').textContent = '【 ' + (data.judgment || '判定取得') + ' 】';
+                  
+                  let scoreVal = data.overall_score || 85.0;
+                  if (typeof scoreVal === 'number') {
+                    scoreVal = scoreVal.toFixed(1) + '%';
+                  }
+                  document.getElementById('resScore').textContent = scoreVal;
+                  document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
+
+                  const warningBox = document.getElementById('warningBox');
+                  const suspiciousDiv = document.getElementById('resSuspiciousPoints');
+                  if (data.suspicious_points && data.suspicious_points.length > 0) {
+                    suspiciousDiv.innerHTML = data.suspicious_points.map(function(pt) { return '・' + pt; }).join('<br>');
+                    warningBox.style.display = 'block';
+                  } else {
+                    warningBox.style.display = 'none';
+                  }
+
+                  if (data.market_prices) {
+                    document.getElementById('resBuyStore').textContent = data.market_prices.buy_store || '-- 円';
+                    document.getElementById('resFleamarket').textContent = data.market_prices.fleamarket || '-- 円';
+                    document.getElementById('resAuction').textContent = data.market_prices.auction || '-- 円';
+                  }
+
+                  const detailsDiv = document.getElementById('detailsContainer');
+                  detailsDiv.innerHTML = '';
+                  if (data.details && data.details.length > 0) {
+                    data.details.forEach(function(item) {
+                      const div = document.createElement('div');
+                      div.className = 'detail-item';
+                      let statusHtml = '';
+                      const st = String(item.status || '').toUpperCase();
+                      if (st === 'PASS' || item.pass === true) {
+                        statusHtml = '<span class="pass-badge">✓ 一致 / 基準内</span>';
+                      } else if (st === 'FAIL' || item.pass === false) {
+                        statusHtml = '<span class="fail-badge">× 不一致 / 異変あり</span>';
+                      } else {
+                        statusHtml = '<span class="unchecked-badge">- 未確認 / 画像なし</span>';
+                      }
+                      div.innerHTML = '<span>' + item.name + '</span>' + statusHtml;
+                      detailsDiv.appendChild(div);
+                    });
+                  }
+
+                  loadingBox.style.display = 'none';
+                  resultCard.style.display = 'block';
+                  if (submitBtn) submitBtn.disabled = false;
+                }
+              }
+            } catch (pollErr) {
+            }
+          }, 2000);
+
+        } catch (err) {
+          clearInterval(timerInterval);
+          if (pollInterval) clearInterval(pollInterval);
+          loadingBox.style.display = 'none';
+          if (submitBtn) submitBtn.disabled = false;
+          alert('送信エラーが発生しました: (' + err.message + ')');
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
