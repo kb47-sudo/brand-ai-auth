@@ -91,6 +91,7 @@
       color: var(--text-sub);
       margin-bottom: 6px;
       display: block;
+      font-weight: 600;
     }
 
     input[type="file"] { display: none; }
@@ -275,7 +276,7 @@
 
       <div class="form-group">
         <label>カテゴリ</label>
-        <select id="category" required>
+        <select id="category" onchange="updatePhotoLabels()" required>
           <option value="バッグ">バッグ</option>
           <option value="時計">時計</option>
           <option value="財布・小物">財布・小物</option>
@@ -284,12 +285,12 @@
       </div>
 
       <div style="margin-top: 16px; margin-bottom: 8px; font-size:0.85rem; font-weight:bold; color:var(--accent-color);">
-        部位別撮影（※表・裏両方で精度が劇的アップ）
+        部位別撮影（※商材に応じた最適ポイント）
       </div>
 
-      <!-- ① 全体写真（表面） -->
+      <!-- ① 撮影部位1 -->
       <div class="photo-upload-box">
-        <label>① 全体写真（表面）</label>
+        <label id="label1">① 全体写真（表面）</label>
         <div class="file-input-wrapper">
           <label for="photo1" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo1" accept="image/*" onchange="handleFileSelect(1)">
@@ -301,9 +302,9 @@
         </div>
       </div>
 
-      <!-- ② 全体写真（裏面・背面構造） -->
+      <!-- ② 撮影部位2 -->
       <div class="photo-upload-box">
-        <label>② 全体写真（裏面・背面ポケット等）</label>
+        <label id="label2">② 全体写真（裏面・背面ポケット等）</label>
         <div class="file-input-wrapper">
           <label for="photo2" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo2" accept="image/*" onchange="handleFileSelect(2)">
@@ -315,9 +316,9 @@
         </div>
       </div>
 
-      <!-- ③ ロゴ刻印 -->
+      <!-- ③ 撮影部位3 -->
       <div class="photo-upload-box">
-        <label>③ ブランドロゴ刻印（接写）</label>
+        <label id="label3">③ ブランドロゴ刻印（接写）</label>
         <div class="file-input-wrapper">
           <label for="photo3" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo3" accept="image/*" onchange="handleFileSelect(3)">
@@ -329,9 +330,9 @@
         </div>
       </div>
 
-      <!-- ④ シリアル・型番印字 -->
+      <!-- ④ 撮影部位4 -->
       <div class="photo-upload-box">
-        <label>④ シリアル・製造番号印字</label>
+        <label id="label4">④ シリアル・型番印字</label>
         <div class="file-input-wrapper">
           <label for="photo4" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo4" accept="image/*" onchange="handleFileSelect(4)">
@@ -343,9 +344,9 @@
         </div>
       </div>
 
-      <!-- ⑤ 金具・パーツ -->
+      <!-- ⑤ 撮影部位5 -->
       <div class="photo-upload-box">
-        <label>⑤ 金具・ビス・ファスナー</label>
+        <label id="label5">⑤ 金具・ビス・ファスナー</label>
         <div class="file-input-wrapper">
           <label for="photo5" class="btn-select">ファイルを選択</label>
           <input type="file" id="photo5" accept="image/*" onchange="handleFileSelect(5)">
@@ -359,7 +360,7 @@
 
       <div class="form-group" style="margin-top:12px;">
         <label style="color:var(--text-sub);">手入力補足型番（空欄でAI完全自動判定）</label>
-        <input type="text" id="modelNumber" placeholder="例: M44336, N51993, 16233G 等">
+        <input type="text" id="modelNumber" placeholder="例: 16233G, M44336, H0940 等">
       </div>
 
       <button type="submit" class="btn-submit">⚡ AI自動識別 ＆ 3大相場査定を実行</button>
@@ -368,7 +369,7 @@
 
   <div id="loadingBox" class="card loading-box">
     <div class="spinner"></div>
-    <div style="font-size: 0.85rem; color: var(--accent-color);">多重AIエンジンが解析中...<br>表・裏面構造照合・刻印判定・3大相場算出中</div>
+    <div style="font-size: 0.85rem; color: var(--accent-color);">多重AIエンジンが解析中...<br>カテゴリ別重要パーツ照合・刻印判定・3大相場算出中</div>
   </div>
 
   <div id="resultCard" class="card result-card">
@@ -412,6 +413,49 @@
 </div>
 
 <script>
+  // カテゴリに応じた撮影項目ラベルの動的変更
+  const categoryLabels = {
+    "バッグ": [
+      "① 全体写真（表面）",
+      "② 全体写真（裏面・背面ポケット等）",
+      "③ ブランドロゴ刻印（接写）",
+      "④ シリアル・製造番号印字",
+      "⑤ 金具・ビス・ファスナー"
+    ],
+    "時計": [
+      "① 文字盤・正面全体",
+      "② 裏蓋・裏蓋刻印（ケースバック）",
+      "③ 文字盤ロゴ・ルーレット刻印（接写）",
+      "④ シリアル・Ref型番刻印（ケース側/保証書）",
+      "⑤ ブレス・バックル・王冠刻印"
+    ],
+    "財布・小物": [
+      "① 全体写真（表面）",
+      "② 全体写真（内側・コインケース開口部）",
+      "③ ブランドロゴ刻印（接写）",
+      "④ シリアル・製造番号印字",
+      "⑤ 金具・スナップボタン・ファスナー"
+    ],
+    "アパレル・靴": [
+      "① 全体写真（正面）",
+      "② 全体写真（背面・ソール裏等）",
+      "③ ブランドタグ・ロゴ刺繍（接写）",
+      "④ 品質表示タグ・サイズ・シリアル印字",
+      "⑤ ボタン・ジッパー・金属パーツ"
+    ]
+  };
+
+  function updatePhotoLabels() {
+    const cat = document.getElementById('category').value;
+    const labels = categoryLabels[cat] || categoryLabels["バッグ"];
+    for (let i = 1; i <= 5; i++) {
+      document.getElementById(`label${i}`).textContent = labels[i - 1];
+    }
+  }
+
+  // 初期化時に実行
+  updatePhotoLabels();
+
   function handleFileSelect(index) {
     const input = document.getElementById(`photo${index}`);
     const previewDiv = document.getElementById(`preview${index}`);
@@ -443,7 +487,6 @@
     previewDiv.style.display = 'none';
   }
 
-  // 通信タイムアウト防止用クライアント側軽量化関数
   async function compressImage(file) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -493,7 +536,6 @@
     for (let i = 1; i <= 5; i++) {
       const input = document.getElementById(`photo${i}`);
       if (input.files && input.files[0]) {
-        // スマホ側で即座に圧縮してからフォームに追加
         const compressed = await compressImage(input.files[0]);
         formData.append('files', compressed);
         fileCount++;
