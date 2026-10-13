@@ -215,7 +215,27 @@
       font-size: 0.85rem;
       line-height: 1.5;
       color: #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    /* 違和感・不審点表示枠 */
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #fca5a5;
       margin-bottom: 16px;
+      display: none;
+    }
+    .warning-title {
+      font-weight: bold;
+      color: #f87171;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .section-title {
@@ -288,7 +308,6 @@
         部位別撮影（※商材に応じた最適ポイント）
       </div>
 
-      <!-- ① 撮影部位1 -->
       <div class="photo-upload-box">
         <label id="label1">① 全体写真（表面）</label>
         <div class="file-input-wrapper">
@@ -302,7 +321,6 @@
         </div>
       </div>
 
-      <!-- ② 撮影部位2 -->
       <div class="photo-upload-box">
         <label id="label2">② 全体写真（裏面・背面ポケット等）</label>
         <div class="file-input-wrapper">
@@ -316,7 +334,6 @@
         </div>
       </div>
 
-      <!-- ③ 撮影部位3 -->
       <div class="photo-upload-box">
         <label id="label3">③ ブランドロゴ刻印（接写）</label>
         <div class="file-input-wrapper">
@@ -330,7 +347,6 @@
         </div>
       </div>
 
-      <!-- ④ 撮影部位4 -->
       <div class="photo-upload-box">
         <label id="label4">④ シリアル・型番印字</label>
         <div class="file-input-wrapper">
@@ -344,7 +360,6 @@
         </div>
       </div>
 
-      <!-- ⑤ 撮影部位5 -->
       <div class="photo-upload-box">
         <label id="label5">⑤ 金具・ビス・ファスナー</label>
         <div class="file-input-wrapper">
@@ -369,7 +384,7 @@
 
   <div id="loadingBox" class="card loading-box">
     <div class="spinner"></div>
-    <div style="font-size: 0.85rem; color: var(--accent-color);">多重AIエンジンが解析中...<br>カテゴリ別重要パーツ照合・刻印判定・3大相場算出中</div>
+    <div style="font-size: 0.85rem; color: var(--accent-color);">多重AIエンジンが解析中...<br>ミクロ異変検証・刻印照合・3大相場算出中</div>
   </div>
 
   <div id="resultCard" class="card result-card">
@@ -393,6 +408,12 @@
       --
     </div>
 
+    <!-- ⚠️ 異変・不審箇所の提示エリア -->
+    <div id="warningBox" class="warning-box">
+      <div class="warning-title">⚠️ 検知された違和感・懸念部位</div>
+      <div id="resSuspiciousPoints">--</div>
+    </div>
+
     <div class="section-title">推定市場流通相場（買取店・フリマ・オークション）</div>
     <div class="price-card">
       <span class="price-label">🏢 買取店相場 (仕入れ目安)</span>
@@ -407,13 +428,12 @@
       <span class="price-value" id="resAuction">-- 円</span>
     </div>
 
-    <div class="section-title" style="margin-top:16px;">多角分析・個別チェック項目</div>
+    <div class="section-title" style="margin-top:16px;">12大多角分析・個別チェック項目</div>
     <div id="detailsContainer"></div>
   </div>
 </div>
 
 <script>
-  // カテゴリに応じた撮影項目ラベルの動的変更
   const categoryLabels = {
     "バッグ": [
       "① 全体写真（表面）",
@@ -453,7 +473,6 @@
     }
   }
 
-  // 初期化時に実行
   updatePhotoLabels();
 
   function handleFileSelect(index) {
@@ -563,7 +582,17 @@
       document.getElementById('resDetectedModel').textContent = data.detected_model || '解析一時保留';
       document.getElementById('resJudgment').textContent = `【 ${data.judgment || '判定結果取得'} 】`;
       document.getElementById('resScore').textContent = `${data.overall_score || 85.0}%`;
-      document.getElementById('resMessage').textContent = data.message || '';
+      document.getElementById('resMessage').innerHTML = (data.message || '').replace(/\n/g, '<br>');
+
+      // 違和感・懸念箇所の表示ロジック
+      const warningBox = document.getElementById('warningBox');
+      const suspiciousDiv = document.getElementById('resSuspiciousPoints');
+      if (data.suspicious_points && data.suspicious_points.length > 0) {
+        suspiciousDiv.innerHTML = data.suspicious_points.map(pt => `・${pt}`).join('<br>');
+        warningBox.style.display = 'block';
+      } else {
+        warningBox.style.display = 'none';
+      }
 
       if (data.market_prices) {
         document.getElementById('resBuyStore').textContent = data.market_prices.buy_store || '-- 円';
