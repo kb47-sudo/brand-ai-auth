@@ -255,6 +255,27 @@
             font-weight: bold;
             color: #f7931a;
         }
+        .warning-banner {
+            display: none;
+            background-color: rgba(229, 62, 62, 0.15);
+            border: 1px solid #e53e3e;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+        }
+        .warning-title {
+            color: #fc8181;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .warning-list {
+            color: #feb2b2;
+            font-size: 12px;
+            margin: 0;
+            padding-left: 18px;
+            line-height: 1.5;
+        }
         .report-text {
             background-color: #0b132b;
             padding: 15px;
@@ -285,6 +306,29 @@
             font-size: 14px;
             font-weight: bold;
             color: #fff;
+        }
+        .external-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-link {
+            flex: 1;
+            background-color: #0b132b;
+            border: 1px solid #3a506b;
+            color: #63b3ed;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-link:hover {
+            border-color: #63b3ed;
+            background-color: rgba(99, 179, 237, 0.1);
         }
         .details-list {
             background-color: #0b132b;
@@ -334,16 +378,15 @@
             color: #f7931a;
         }
 
-        /* 印刷・PDF用スタイリング */
         @media print {
             body { background-color: #fff !important; color: #000 !important; }
-            #authLockOverlay, #step1Card, #step2Card, .btn-submit, .btn-secondary, .header p { display: none !important; }
+            #authLockOverlay, #step1Card, #step2Card, .btn-submit, .btn-secondary, .external-links, .header p { display: none !important; }
             .container { max-width: 100% !important; width: 100% !important; }
             .result-box { display: block !important; border: 2px solid #000 !important; background: #fff !important; color: #000 !important; }
-            .result-header, .report-text, .price-card, .details-list, .profit-card { background: #f8f9fa !important; border-color: #ccc !important; color: #000 !important; }
+            .result-header, .report-text, .price-card, .details-list, .profit-card, .warning-banner { background: #f8f9fa !important; border-color: #ccc !important; color: #000 !important; }
             .score-val, .label, .price-title { color: #000 !important; }
             .pass-tag { color: #2e7d32 !important; }
-            .fail-tag { color: #c62828 !important; }
+            .fail-tag, .warning-title, .warning-list { color: #c62828 !important; }
         }
     </style>
 </head>
@@ -365,7 +408,6 @@
             <p>モデル候補抽出 ➔ 8部位精密鑑識 ＆ 公式定価＋粗利連動相場エンジン</p>
         </div>
 
-        <!-- STEP 1: 全体写真からモデル候補3選の絞り込み -->
         <div class="card" id="step1Card">
             <span class="label">【Step 1】対象ブランド・カテゴリの選択</span>
             <select id="brandSelect">
@@ -425,7 +467,6 @@
             <button class="btn-submit" onclick="submitCandidateDetect()">🔍 AIで適合モデル候補（3選）を特定する</button>
         </div>
 
-        <!-- STEP 2: 候補選択および8部位撮影＋精密鑑識 -->
         <div class="card" id="step2Card" style="display:none;">
             <span class="label">【Step 2】モデル候補の選択（または手入力確定）</span>
             <div id="candidateList"></div>
@@ -486,7 +527,12 @@
                 </div>
             </div>
 
-            <!-- 粗利シミュレーター（即決買取提示上限） -->
+            <!-- 赤色ハイライト警告バナー (真贋リスク時自動表示) -->
+            <div class="warning-banner" id="warningBanner">
+                <div class="warning-title">⚠️ 検知された違和感・懸念部位</div>
+                <ul class="warning-list" id="warningList"></ul>
+            </div>
+
             <div class="profit-card">
                 <div style="font-size:11px; color:#68d391; font-weight:bold;">💡 【自社目標粗利適応】 店頭提示・即決買取上限目安</div>
                 <div id="calculatedOfferCap" style="font-size:18px; font-weight:bold; color:#68d391; margin-top:4px;">-- 円</div>
@@ -514,14 +560,18 @@
                 </div>
             </div>
 
+            <!-- 一次情報直リンクボタン -->
+            <div class="external-links">
+                <a id="linkYahoo" class="btn-link" href="#" target="_blank">🔨 ヤフオク落札履歴を直接確認</a>
+                <a id="linkMercari" class="btn-link" href="#" target="_blank">📱 メルカリ売り切れ履歴を確認</a>
+            </div>
+
             <span class="label" style="margin-top:15px;">12大多角分析・個別チェック結果</span>
             <div class="details-list" id="detailsList"></div>
 
-            <!-- PDF出力・印刷ボタン -->
             <button class="btn-submit" style="background: linear-gradient(135deg, #48bb78, #38a169); color:#fff; margin-top:20px;" onclick="window.print()">📄 A4査定レポートを印刷 / PDF保存</button>
         </div>
 
-        <!-- 査定履歴＆CSV保存カード -->
         <div class="card" style="margin-top:30px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span class="label" style="margin:0;">📜 店舗査定履歴ログ</span>
@@ -533,7 +583,7 @@
                         <tr>
                             <th>日時</th>
                             <th>ブランド</th>
-                            <th>型番/品名</th>
+                            <th>型番/モデル名</th>
                             <th>判定</th>
                             <th>スコア</th>
                             <th>買取相場</th>
@@ -839,11 +889,44 @@
             document.getElementById("loadingBox").style.display = "none";
             document.getElementById("resultBox").style.display = "block";
 
-            document.getElementById("resModel").textContent = data.detected_model || "特定不能";
+            const detectedText = data.detected_model || "特定不能";
+            document.getElementById("resModel").textContent = detectedText;
             document.getElementById("resOfficialPrice").textContent = `🏷️ 公式定価: ${data.official_price || "算定中..."}`;
             document.getElementById("resJudgment").textContent = `【 ${data.judgment || "判定不能"} 】`;
-            document.getElementById("resScore").textContent = `${data.overall_score || 0}%`;
+            
+            const score = data.overall_score || 0;
+            document.getElementById("resScore").textContent = `${score}%`;
             document.getElementById("resMessage").textContent = data.message || "詳細メッセージなし";
+
+            // ⚠️ 真贋リスク警告ハイライト処理
+            const warningBanner = document.getElementById("warningBanner");
+            const warningList = document.getElementById("warningList");
+            warningList.innerHTML = "";
+
+            let hasRisk = false;
+            if (score < 85.0 || data.judgment === "注意" || data.judgment === "基準外") {
+                hasRisk = true;
+            }
+
+            if (data.suspicious_points && Array.isArray(data.suspicious_points) && data.suspicious_points.length > 0) {
+                hasRisk = true;
+                data.suspicious_points.forEach(point => {
+                    const li = document.createElement("li");
+                    li.textContent = point;
+                    warningList.appendChild(li);
+                });
+            } else if (hasRisk) {
+                const li = document.createElement("li");
+                li.textContent = "AI一致率スコアが低水準です。刻印フォントおよび仕様の目視再検品を強く推奨します。";
+                warningList.appendChild(li);
+            }
+
+            warningBanner.style.display = hasRisk ? "block" : "none";
+
+            // 🔗 一次情報直リンクの自動生成
+            const cleanQuery = encodeURIComponent(detectedText.replace(/\[.*?\]/g, '').trim());
+            document.getElementById("linkYahoo").href = `https://auctions.yahoo.co.jp/closedsearch/closedsearch?p=${cleanQuery}`;
+            document.getElementById("linkMercari").href = `https://jp.mercari.com/search?keyword=${cleanQuery}&status=sold_out`;
 
             if (data.market_prices) {
                 document.getElementById("priceBuy").textContent = data.market_prices.buy_store || "-- 円";
@@ -851,7 +934,6 @@
                 document.getElementById("priceAuc").textContent = data.market_prices.auction || "-- 円";
                 document.getElementById("priceFull").textContent = data.market_prices.full_set_estimate || "買取相場と同等";
 
-                // 粗利上限額の自動数値抽出・試算
                 const numMatch = (data.market_prices.buy_store || "").replace(/,/g, '').match(/\d+/g);
                 if (numMatch && numMatch.length > 0) {
                     lastRawBuyPrice = parseInt(numMatch[numMatch.length - 1], 10);
@@ -875,7 +957,6 @@
                 });
             }
 
-            // 履歴への保存
             saveToHistory(data);
         }
 
