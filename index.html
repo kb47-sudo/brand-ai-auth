@@ -388,11 +388,11 @@
 
         <!-- STEP 2: 候補選択および8部位撮影＋精密鑑識 -->
         <div class="card" id="step2Card" style="display:none;">
-            <span class="label">【Step 2】モデル候補の特定・選択</span>
+            <span class="label">【Step 2】モデル候補の選択（または手入力確定）</span>
             <div id="candidateList"></div>
 
-            <span class="label" style="margin-top:10px;">手入力自由補足型番（※必要時のみ上書き）</span>
-            <input type="text" id="modelNumberInput" placeholder="例: Ref.126610LN, M44336 等">
+            <span class="label" style="margin-top:12px;">手入力型番（※候補内にない場合にこちらに入力して確定）</span>
+            <input type="text" id="modelNumberInput" placeholder="例: Ref.126610LN, M44336 等（候補にない場合はここに入力）" oninput="onManualInputChanged()">
 
             <span class="label">コンディション指定ランク</span>
             <select id="conditionSelect">
@@ -469,6 +469,7 @@
         const API_BASE = "https://brand-ai-backend-1.onrender.com";
         const CORRECT_PASS = "4785";
         let selectedCandidateTitle = "";
+        let isManualSelected = false;
 
         function verifyPassword() {
             const inputVal = document.getElementById("passInput").value.trim();
@@ -502,7 +503,6 @@
             }
         }
 
-        // Step 1: モデル候補3選の取得
         async function submitCandidateDetect() {
             const fileInput = document.getElementById("step1_file");
             if (fileInput.files.length === 0) {
@@ -557,7 +557,10 @@
                 candidates.forEach((item, idx) => {
                     const div = document.createElement("div");
                     div.className = `candidate-item ${idx === 0 ? 'selected' : ''}`;
-                    if (idx === 0) selectedCandidateTitle = item.title;
+                    if (idx === 0) {
+                        selectedCandidateTitle = item.title;
+                        isManualSelected = false;
+                    }
                     div.innerHTML = `
                         <div class="candidate-title">🎯 候補${idx + 1}: ${item.title}</div>
                         <div class="candidate-desc">${item.desc}</div>
@@ -566,11 +569,40 @@
                         document.querySelectorAll(".candidate-item").forEach(el => el.classList.remove("selected"));
                         div.classList.add("selected");
                         selectedCandidateTitle = item.title;
+                        isManualSelected = false;
+                        document.getElementById("modelNumberInput").value = "";
                     };
                     container.appendChild(div);
                 });
             }
+
+            // 「候補内にないため手入力で指定する」専用カードの追加
+            const manualDiv = document.createElement("div");
+            manualDiv.className = "candidate-item";
+            manualDiv.id = "manualCandidateCard";
+            manualDiv.innerHTML = `
+                <div class="candidate-title">✍️ 候補内にないため手入力でモデル確定する</div>
+                <div class="candidate-desc">下の「手入力型番」欄に型番・正式名称を入力して適用します</div>
+            `;
+            manualDiv.onclick = () => {
+                document.querySelectorAll(".candidate-item").forEach(el => el.classList.remove("selected"));
+                manualDiv.classList.add("selected");
+                isManualSelected = true;
+                document.getElementById("modelNumberInput").focus();
+            };
+            container.appendChild(manualDiv);
+
             updateFormFields();
+        }
+
+        function onManualInputChanged() {
+            const inputVal = document.getElementById("modelNumberInput").value.trim();
+            if (inputVal.length > 0) {
+                document.querySelectorAll(".candidate-item").forEach(el => el.classList.remove("selected"));
+                const manualCard = document.getElementById("manualCandidateCard");
+                if (manualCard) manualCard.classList.add("selected");
+                isManualSelected = true;
+            }
         }
 
         const photoGuides = {
@@ -645,7 +677,6 @@
             }
         }
 
-        // Step 2: 8部位精密鑑識＆公式定価＋相場出力
         async function submitAuth() {
             const category = document.getElementById("categorySelect").value;
             const guides = photoGuides[category] || photoGuides["バッグ"];
@@ -675,8 +706,14 @@
             const accString = accList.length > 0 ? accList.join(", ") : "付属品なし（本体のみ）";
 
             const condition = document.getElementById("conditionSelect").value;
-            const userManualInput = document.getElementById("modelNumberInput").value;
-            const targetModelText = userManualInput || selectedCandidateTitle || "自動照合";
+            const userManualInput = document.getElementById("modelNumberInput").value.trim();
+            
+            let targetModelText = "";
+            if (isManualSelected || userManualInput.length > 0) {
+                targetModelText = `[ユーザー指定手入力型番] ${userManualInput || '未入力自由指定'}`;
+            } else {
+                targetModelText = selectedCandidateTitle || "自動照合";
+            }
 
             const formData = new FormData();
             formData.append("brand", document.getElementById("brandSelect").value);
