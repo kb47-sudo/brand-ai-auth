@@ -252,6 +252,30 @@
             font-weight: bold;
             color: #fff;
         }
+        .details-list {
+            background-color: #0b132b;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px dotted #3a506b;
+        }
+        .details-item:last-child {
+            border-bottom: none;
+        }
+        .pass-tag {
+            color: #48bb78;
+            font-weight: bold;
+        }
+        .fail-tag {
+            color: #f56565;
+            font-weight: bold;
+        }
         .loading {
             display: none;
             text-align: center;
@@ -377,7 +401,7 @@
 
             <div class="report-text" id="resMessage"></div>
 
-            <span class="label">ランク・付属品条件別 推定流通相場マトリクス</span>
+            <span class="label">付属品・条件別 推定流通相場マトリクス</span>
             <div class="price-grid">
                 <div class="price-card">
                     <div class="price-title">🏢 指定条件での買取目安</div>
@@ -396,6 +420,9 @@
                     <div class="price-val" id="priceFull" style="color:#68d391;">-- 円</div>
                 </div>
             </div>
+
+            <span class="label" style="margin-top:15px;">12大多角分析・個別チェック結果</span>
+            <div class="details-list" id="detailsList"></div>
         </div>
     </div>
 
@@ -426,7 +453,6 @@
             document.getElementById("mainContainer").style.display = "block";
         }
 
-        // 8部位精密ガイド定義
         const photoGuides = {
             "腕時計": [
                 { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り" },
@@ -592,6 +618,23 @@
                 document.getElementById("priceFlea").textContent = data.market_prices.fleamarket || "-- 円";
                 document.getElementById("priceAuc").textContent = data.market_prices.auction || "-- 円";
                 document.getElementById("priceFull").textContent = data.market_prices.full_set_estimate || "買取相場と同等";
+            }
+
+            // 12箇所多角判定リストの動的描画
+            const detailsList = document.getElementById("detailsList");
+            detailsList.innerHTML = "";
+            if (data.details && Array.isArray(data.details)) {
+                data.details.forEach(item => {
+                    const statusClass = item.status === "PASS" ? "pass-tag" : (item.status === "FAIL" ? "fail-tag" : "");
+                    const statusText = item.status === "PASS" ? "✓ 一致 / 基準内" : (item.status === "FAIL" ? "✕ 不適合 / 違和感" : "- 未確認");
+                    const row = `
+                        <div class="details-item">
+                            <span>${item.name}</span>
+                            <span class="${statusClass}">${statusText}</span>
+                        </div>
+                    `;
+                    detailsList.innerHTML += row;
+                });
             }
         }
 
