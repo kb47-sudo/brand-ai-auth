@@ -620,7 +620,6 @@
                 document.getElementById("priceFull").textContent = data.market_prices.full_set_estimate || "買取相場と同等";
             }
 
-            // 12箇所多角判定リストの動的描画
             const detailsList = document.getElementById("detailsList");
             detailsList.innerHTML = "";
             if (data.details && Array.isArray(data.details)) {
