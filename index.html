@@ -124,6 +124,29 @@
             box-sizing: border-box;
             margin-bottom: 18px;
         }
+        .candidate-item {
+            background-color: #0b132b;
+            border: 1px solid #3a506b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .candidate-item:hover, .candidate-item.selected {
+            border-color: #f7931a;
+            background-color: rgba(247, 147, 26, 0.1);
+        }
+        .candidate-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .candidate-desc {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-top: 4px;
+        }
         .file-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -300,12 +323,13 @@
     <div class="container" id="mainContainer" style="display:none;">
         <div class="header">
             <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
-            <p>8部位精密AI鑑識 & ランク・付属品連動 動的市場査定</p>
+            <p>モデル候補抽出 ➔ 8部位精密鑑識 ＆ 公式定価＋市場相場エンジン</p>
         </div>
 
-        <div class="card">
-            <span class="label">対象ブランド</span>
-            <select id="brandSelect" onchange="updateFormFields()">
+        <!-- STEP 1: 全体写真からモデル候補3選の絞り込み -->
+        <div class="card" id="step1Card">
+            <span class="label">【Step 1】対象ブランド・カテゴリの選択</span>
+            <select id="brandSelect">
                 <optgroup label="高級時計 (Luxury Watches)">
                     <option value="Rolex">Rolex (ロレックス)</option>
                     <option value="Patek Philippe">Patek Philippe (パテック フィリップ)</option>
@@ -344,16 +368,31 @@
                 </optgroup>
             </select>
 
-            <span class="label">カテゴリ</span>
-            <select id="categorySelect" onchange="updateFormFields()">
+            <select id="categorySelect">
                 <option value="バッグ" selected>バッグ</option>
                 <option value="財布・小物">財布・小物</option>
                 <option value="腕時計">腕時計 (Watch)</option>
                 <option value="ジュエリー・アクセサリー">ジュエリー・アクセサリー</option>
             </select>
 
-            <span class="label">指定型番（Ref.番号 / 型番コード）※入力推奨</span>
-            <input type="text" id="modelNumberInput" placeholder="入力でAIが画像との照合適合性を判定（例: Ref.126610LN, M44336 等）">
+            <span class="label">全体写真の選択（※型番不詳時は1〜2枚送信）</span>
+            <div class="file-upload-box">
+                <div class="file-upload-title">全体写真（表面/文字盤）</div>
+                <label class="file-btn" for="step1_file">画像を選択</label>
+                <span id="step1_fileName" style="font-size:11px; color:#a0aec0; margin-left:6px;">未選択</span>
+                <input type="file" id="step1_file" accept="image/*" onchange="updateStep1FileName()">
+            </div>
+
+            <button class="btn-submit" onclick="submitCandidateDetect()">🔍 AIで適合モデル候補（3選）を特定する</button>
+        </div>
+
+        <!-- STEP 2: 候補選択および8部位撮影＋精密鑑識 -->
+        <div class="card" id="step2Card" style="display:none;">
+            <span class="label">【Step 2】モデル候補の特定・選択</span>
+            <div id="candidateList"></div>
+
+            <span class="label" style="margin-top:10px;">手入力自由補足型番（※必要時のみ上書き）</span>
+            <input type="text" id="modelNumberInput" placeholder="例: Ref.126610LN, M44336 等">
 
             <span class="label">コンディション指定ランク</span>
             <select id="conditionSelect">
@@ -363,7 +402,7 @@
                 <option value="Cランク（強い使用感・難あり・ジャンク）">Cランク（傷多数・ダメージ・要リペア）</option>
             </select>
 
-            <span class="label">付属品の有無（※相場変動の超重要要素）</span>
+            <span class="label">付属品の有無（※相場変動要素）</span>
             <div class="checkbox-group">
                 <label class="checkbox-item"><input type="checkbox" id="acc_gar" value="ギャランティ/保証書あり"> ギャランティ/保証書</label>
                 <label class="checkbox-item"><input type="checkbox" id="acc_box" value="純正箱あり"> 純正外箱・内箱</label>
@@ -371,21 +410,21 @@
                 <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・証明書あり"> 保存袋/証明書</label>
             </div>
 
-            <span class="label" id="fieldSectionTitle">商材別 高精度鑑定撮影枠（最大8アングル）</span>
+            <span class="label" id="fieldSectionTitle">高精度鑑識撮影枠（最大8アングル）</span>
             <div id="fileUploadContainer" class="file-grid"></div>
 
-            <button class="btn-submit" onclick="submitAuth()">⚡ 8部位AI精密鑑識 & ランク別市場相場査定</button>
+            <button class="btn-submit" onclick="submitAuth()">⚡ 8部位AI精密鑑識 & 公式定価＋相場査定を実行</button>
         </div>
 
         <div class="loading" id="loadingBox">
-            <p>🔄 指定型番照合・8部位マルチAI解析・ランク別相場計算中...</p>
-            <p style="font-size:12px; color:#a0aec0;">※20項目超の真贋アルゴリズムおよび国内市場オークションデータを完全照合中</p>
+            <p id="loadingMsg">🔄 画像解析＆適合モデル抽出中...</p>
         </div>
 
         <div class="result-box" id="resultBox">
             <div class="result-header">
                 <div style="font-size:12px; color:#a0aec0;">🔍 AI型番特定・照合結果</div>
                 <div id="resModel" style="font-size:16px; font-weight:bold; color:#fff; margin-top:4px;"></div>
+                <div id="resOfficialPrice" style="font-size:13px; color:#f7931a; margin-top:6px; font-weight:bold;">🏷️ 公式定価: 算定中...</div>
             </div>
 
             <div class="score-box">
@@ -429,6 +468,7 @@
     <script>
         const API_BASE = "https://brand-ai-backend-1.onrender.com";
         const CORRECT_PASS = "4785";
+        let selectedCandidateTitle = "";
 
         function verifyPassword() {
             const inputVal = document.getElementById("passInput").value.trim();
@@ -451,6 +491,86 @@
         if (sessionStorage.getItem("brand_app_auth") === "true") {
             document.getElementById("authLockOverlay").style.display = "none";
             document.getElementById("mainContainer").style.display = "block";
+        }
+
+        function updateStep1FileName() {
+            const input = document.getElementById("step1_file");
+            const span = document.getElementById("step1_fileName");
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+                span.style.color = "#48bb78";
+            }
+        }
+
+        // Step 1: モデル候補3選の取得
+        async function submitCandidateDetect() {
+            const fileInput = document.getElementById("step1_file");
+            if (fileInput.files.length === 0) {
+                alert("全体写真を1枚選択してください。");
+                return;
+            }
+
+            document.getElementById("loadingBox").style.display = "block";
+            document.getElementById("loadingMsg").textContent = "🔄 全体写真から適合モデル候補（3選）を分析中...";
+
+            const formData = new FormData();
+            formData.append("brand", document.getElementById("brandSelect").value);
+            formData.append("category", document.getElementById("categorySelect").value);
+            formData.append("files", fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/detect_candidates`, {
+                    method: "POST",
+                    body: formData
+                });
+                if (!res.ok) throw new Error("送信エラー");
+                const data = await res.json();
+                pollCandidateResult(data.job_id);
+            } catch (err) {
+                alert("候補検出エラー: " + err.message);
+                document.getElementById("loadingBox").style.display = "none";
+            }
+        }
+
+        async function pollCandidateResult(jobId) {
+            const timer = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/api/v1/result/${jobId}`);
+                    if (res.ok) {
+                        const job = await res.json();
+                        if (job.status === "completed") {
+                            clearInterval(timer);
+                            renderCandidates(job.data.candidates);
+                        }
+                    }
+                } catch (e) { console.error(e); }
+            }, 2500);
+        }
+
+        function renderCandidates(candidates) {
+            document.getElementById("loadingBox").style.display = "none";
+            document.getElementById("step2Card").style.display = "block";
+            const container = document.getElementById("candidateList");
+            container.innerHTML = "";
+
+            if (candidates && candidates.length > 0) {
+                candidates.forEach((item, idx) => {
+                    const div = document.createElement("div");
+                    div.className = `candidate-item ${idx === 0 ? 'selected' : ''}`;
+                    if (idx === 0) selectedCandidateTitle = item.title;
+                    div.innerHTML = `
+                        <div class="candidate-title">🎯 候補${idx + 1}: ${item.title}</div>
+                        <div class="candidate-desc">${item.desc}</div>
+                    `;
+                    div.onclick = () => {
+                        document.querySelectorAll(".candidate-item").forEach(el => el.classList.remove("selected"));
+                        div.classList.add("selected");
+                        selectedCandidateTitle = item.title;
+                    };
+                    container.appendChild(div);
+                });
+            }
+            updateFormFields();
         }
 
         const photoGuides = {
@@ -498,16 +618,7 @@
 
         function updateFormFields() {
             const category = document.getElementById("categorySelect").value;
-            const brand = document.getElementById("brandSelect").value;
-            
-            const watchBrands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Vacheron Constantin", "Omega", "Cartier", "Grand Seiko", "IWC", "Hublot", "Breguet", "A. Lange & Söhne", "Richard Mille", "Tag Heuer", "Breitling", "Tudor", "Zenith", "Panerai", "Jaeger-LeCoultre"];
-            if (watchBrands.includes(brand) && category !== "腕時計") {
-                document.getElementById("categorySelect").value = "腕時計";
-            }
-
-            const currentCategory = document.getElementById("categorySelect").value;
-            const guides = photoGuides[currentCategory] || photoGuides["バッグ"];
-
+            const guides = photoGuides[category] || photoGuides["バッグ"];
             const container = document.getElementById("fileUploadContainer");
             container.innerHTML = "";
 
@@ -534,9 +645,10 @@
             }
         }
 
+        // Step 2: 8部位精密鑑識＆公式定価＋相場出力
         async function submitAuth() {
-            const currentCategory = document.getElementById("categorySelect").value;
-            const guides = photoGuides[currentCategory] || photoGuides["バッグ"];
+            const category = document.getElementById("categorySelect").value;
+            const guides = photoGuides[category] || photoGuides["バッグ"];
             
             const files = [];
             for (let i = 0; i < guides.length; i++) {
@@ -547,11 +659,12 @@
             }
 
             if (files.length === 0) {
-                alert("画像を1枚以上選択してください。");
+                alert("解析用画像を1枚以上選択してください。");
                 return;
             }
 
             document.getElementById("loadingBox").style.display = "block";
+            document.getElementById("loadingMsg").textContent = "🔄 8部位マルチAI精密鑑識・公式定価＆市場相場算出中...";
             document.getElementById("resultBox").style.display = "none";
 
             const accList = [];
@@ -562,12 +675,13 @@
             const accString = accList.length > 0 ? accList.join(", ") : "付属品なし（本体のみ）";
 
             const condition = document.getElementById("conditionSelect").value;
-            const modelInput = document.getElementById("modelNumberInput").value;
+            const userManualInput = document.getElementById("modelNumberInput").value;
+            const targetModelText = userManualInput || selectedCandidateTitle || "自動照合";
 
             const formData = new FormData();
             formData.append("brand", document.getElementById("brandSelect").value);
             formData.append("category", document.getElementById("categorySelect").value);
-            formData.append("model_number", `指定型番: ${modelInput || '未指定'} | 付属品: ${accString} | コンディションランク: ${condition}`);
+            formData.append("model_number", `選択・指定モデル: ${targetModelText} | 付属品: ${accString} | コンディションランク: ${condition}`);
             
             files.forEach(f => formData.append("files", f));
 
@@ -576,13 +690,11 @@
                     method: "POST",
                     body: formData
                 });
-
-                if (!res.ok) throw new Error("送信エラーが発生しました");
-
+                if (!res.ok) throw new Error("送信エラー");
                 const data = await res.json();
                 pollResult(data.job_id);
             } catch (err) {
-                alert("送信に失敗しました。時間をおいて再試行してください: " + err.message);
+                alert("送信に失敗しました: " + err.message);
                 document.getElementById("loadingBox").style.display = "none";
             }
         }
@@ -598,9 +710,7 @@
                             renderResult(job.data);
                         }
                     }
-                } catch (e) {
-                    console.error(e);
-                }
+                } catch (e) { console.error(e); }
             }, 3000);
         }
 
@@ -609,6 +719,7 @@
             document.getElementById("resultBox").style.display = "block";
 
             document.getElementById("resModel").textContent = data.detected_model || "特定不能";
+            document.getElementById("resOfficialPrice").textContent = `🏷️ 公式定価: ${data.official_price || "算定中..."}`;
             document.getElementById("resJudgment").textContent = `【 ${data.judgment || "判定不能"} 】`;
             document.getElementById("resScore").textContent = `${data.overall_score || 0}%`;
             document.getElementById("resMessage").textContent = data.message || "詳細メッセージなし";
