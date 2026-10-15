@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI AUTHENTICATOR & MARKET VALUATION REPORT</title>
+    <title>PRO AI AUTHENTICATOR & MARKET ENGINE</title>
     <style>
         body {
             background-color: #0b132b;
@@ -15,7 +15,7 @@
             justify-content: center;
         }
         .container {
-            max-width: 650px;
+            max-width: 680px;
             width: 100%;
         }
         
@@ -218,6 +218,17 @@
             box-shadow: 0 4px 10px rgba(247, 147, 26, 0.3);
             margin-top: 10px;
         }
+        .btn-secondary {
+            background-color: #3a506b;
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
         .result-box {
             display: none;
             background-color: #1c2541;
@@ -291,20 +302,48 @@
         .details-item:last-child {
             border-bottom: none;
         }
-        .pass-tag {
-            color: #48bb78;
-            font-weight: bold;
-        }
-        .fail-tag {
-            color: #f56565;
-            font-weight: bold;
-        }
+        .pass-tag { color: #48bb78; font-weight: bold; }
+        .fail-tag { color: #f56565; font-weight: bold; }
         .loading {
             display: none;
             text-align: center;
             padding: 20px;
             font-size: 14px;
             color: #f7931a;
+        }
+        .profit-card {
+            background-color: #0b132b;
+            border: 1px solid #48bb78;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+        .history-table th, .history-table td {
+            border: 1px solid #3a506b;
+            padding: 6px;
+            text-align: left;
+        }
+        .history-table th {
+            background-color: #0b132b;
+            color: #f7931a;
+        }
+
+        /* 印刷・PDF用スタイリング */
+        @media print {
+            body { background-color: #fff !important; color: #000 !important; }
+            #authLockOverlay, #step1Card, #step2Card, .btn-submit, .btn-secondary, .header p { display: none !important; }
+            .container { max-width: 100% !important; width: 100% !important; }
+            .result-box { display: block !important; border: 2px solid #000 !important; background: #fff !important; color: #000 !important; }
+            .result-header, .report-text, .price-card, .details-list, .profit-card { background: #f8f9fa !important; border-color: #ccc !important; color: #000 !important; }
+            .score-val, .label, .price-title { color: #000 !important; }
+            .pass-tag { color: #2e7d32 !important; }
+            .fail-tag { color: #c62828 !important; }
         }
     </style>
 </head>
@@ -322,8 +361,8 @@
 
     <div class="container" id="mainContainer" style="display:none;">
         <div class="header">
-            <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
-            <p>モデル候補抽出 ➔ 8部位精密鑑識 ＆ 公式定価＋市場相場エンジン</p>
+            <h1>PRO AI AUTHENTICATOR & MARKET ENGINE</h1>
+            <p>モデル候補抽出 ➔ 8部位精密鑑識 ＆ 公式定価＋粗利連動相場エンジン</p>
         </div>
 
         <!-- STEP 1: 全体写真からモデル候補3選の絞り込み -->
@@ -375,12 +414,12 @@
                 <option value="ジュエリー・アクセサリー">ジュエリー・アクセサリー</option>
             </select>
 
-            <span class="label">全体写真の選択（※型番不詳時は1〜2枚送信）</span>
+            <span class="label">全体写真の選択（※カメラ撮影可）</span>
             <div class="file-upload-box">
                 <div class="file-upload-title">全体写真（表面/文字盤）</div>
-                <label class="file-btn" for="step1_file">画像を選択</label>
+                <label class="file-btn" for="step1_file">📷 カメラ起動 / 写真選択</label>
                 <span id="step1_fileName" style="font-size:11px; color:#a0aec0; margin-left:6px;">未選択</span>
-                <input type="file" id="step1_file" accept="image/*" onchange="updateStep1FileName()">
+                <input type="file" id="step1_file" accept="image/*" capture="environment" onchange="updateStep1FileName()">
             </div>
 
             <button class="btn-submit" onclick="submitCandidateDetect()">🔍 AIで適合モデル候補（3選）を特定する</button>
@@ -393,6 +432,15 @@
 
             <span class="label" style="margin-top:12px;">手入力型番（※候補内にない場合にこちらに入力して確定）</span>
             <input type="text" id="modelNumberInput" placeholder="例: Ref.126610LN, M44336 等（候補にない場合はここに入力）" oninput="onManualInputChanged()">
+
+            <span class="label">自社目標粗利率（※買取り上限試算用）</span>
+            <select id="profitMarginSelect" onchange="recalculateProfitCap()">
+                <option value="0.10">目標粗利 10% (高額時計・強気買取り)</option>
+                <option value="0.15">目標粗利 15% (標準買取基準)</option>
+                <option value="0.20" selected>目標粗利 20% (標準買取利益確保)</option>
+                <option value="0.25">目標粗利 25% (利益重視)</option>
+                <option value="0.30">目標粗利 30% (高粗利設定)</option>
+            </select>
 
             <span class="label">コンディション指定ランク</span>
             <select id="conditionSelect">
@@ -410,7 +458,7 @@
                 <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・証明書あり"> 保存袋/証明書</label>
             </div>
 
-            <span class="label" id="fieldSectionTitle">高精度鑑識撮影枠（最大8アングル）</span>
+            <span class="label" id="fieldSectionTitle">高精度鑑識撮影枠（最大8アングル / カメラ直結）</span>
             <div id="fileUploadContainer" class="file-grid"></div>
 
             <button class="btn-submit" onclick="submitAuth()">⚡ 8部位AI精密鑑識 & 公式定価＋相場査定を実行</button>
@@ -438,12 +486,18 @@
                 </div>
             </div>
 
+            <!-- 粗利シミュレーター（即決買取提示上限） -->
+            <div class="profit-card">
+                <div style="font-size:11px; color:#68d391; font-weight:bold;">💡 【自社目標粗利適応】 店頭提示・即決買取上限目安</div>
+                <div id="calculatedOfferCap" style="font-size:18px; font-weight:bold; color:#68d391; margin-top:4px;">-- 円</div>
+            </div>
+
             <div class="report-text" id="resMessage"></div>
 
             <span class="label">付属品・条件別 推定流通相場マトリクス</span>
             <div class="price-grid">
                 <div class="price-card">
-                    <div class="price-title">🏢 指定条件での買取目安</div>
+                    <div class="price-title">🏢 指定条件での仕入れ買取相場</div>
                     <div class="price-val" id="priceBuy">-- 円</div>
                 </div>
                 <div class="price-card">
@@ -462,6 +516,34 @@
 
             <span class="label" style="margin-top:15px;">12大多角分析・個別チェック結果</span>
             <div class="details-list" id="detailsList"></div>
+
+            <!-- PDF出力・印刷ボタン -->
+            <button class="btn-submit" style="background: linear-gradient(135deg, #48bb78, #38a169); color:#fff; margin-top:20px;" onclick="window.print()">📄 A4査定レポートを印刷 / PDF保存</button>
+        </div>
+
+        <!-- 査定履歴＆CSV保存カード -->
+        <div class="card" style="margin-top:30px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="label" style="margin:0;">📜 店舗査定履歴ログ</span>
+                <button class="btn-secondary" onclick="exportHistoryCSV()">📥 査定履歴をCSV出力</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>日時</th>
+                            <th>ブランド</th>
+                            <th>型番/品名</th>
+                            <th>判定</th>
+                            <th>スコア</th>
+                            <th>買取相場</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr><td colspan="6" style="text-align:center; color:#a0aec0;">査定履歴はありません</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -470,6 +552,7 @@
         const CORRECT_PASS = "4785";
         let selectedCandidateTitle = "";
         let isManualSelected = false;
+        let lastRawBuyPrice = 0;
 
         function verifyPassword() {
             const inputVal = document.getElementById("passInput").value.trim();
@@ -478,6 +561,7 @@
                 document.getElementById("mainContainer").style.display = "block";
                 sessionStorage.setItem("brand_app_auth", "true");
                 updateFormFields();
+                loadHistoryTable();
             } else {
                 document.getElementById("errorMsg").style.display = "block";
             }
@@ -492,6 +576,7 @@
         if (sessionStorage.getItem("brand_app_auth") === "true") {
             document.getElementById("authLockOverlay").style.display = "none";
             document.getElementById("mainContainer").style.display = "block";
+            window.addEventListener("DOMContentLoaded", loadHistoryTable);
         }
 
         function updateStep1FileName() {
@@ -576,7 +661,6 @@
                 });
             }
 
-            // 「候補内にないため手入力で指定する」専用カードの追加
             const manualDiv = document.createElement("div");
             manualDiv.className = "candidate-item";
             manualDiv.id = "manualCandidateCard";
@@ -659,9 +743,9 @@
                     <div class="file-upload-box">
                         <div class="file-upload-title">${item.name}</div>
                         <div class="file-upload-desc">${item.desc}</div>
-                        <label class="file-btn" for="file_${idx}">ファイルを選択</label>
+                        <label class="file-btn" for="file_${idx}">📷 カメラ起動 / 写真選択</label>
                         <span id="fileName_${idx}" style="font-size:10px; color:#a0aec0; margin-left:4px;">未選択</span>
-                        <input type="file" id="file_${idx}" accept="image/*" onchange="updateFileName(${idx})">
+                        <input type="file" id="file_${idx}" accept="image/*" capture="environment" onchange="updateFileName(${idx})">
                     </div>
                 `;
                 container.innerHTML += html;
@@ -766,6 +850,13 @@
                 document.getElementById("priceFlea").textContent = data.market_prices.fleamarket || "-- 円";
                 document.getElementById("priceAuc").textContent = data.market_prices.auction || "-- 円";
                 document.getElementById("priceFull").textContent = data.market_prices.full_set_estimate || "買取相場と同等";
+
+                // 粗利上限額の自動数値抽出・試算
+                const numMatch = (data.market_prices.buy_store || "").replace(/,/g, '').match(/\d+/g);
+                if (numMatch && numMatch.length > 0) {
+                    lastRawBuyPrice = parseInt(numMatch[numMatch.length - 1], 10);
+                    recalculateProfitCap();
+                }
             }
 
             const detailsList = document.getElementById("detailsList");
@@ -783,6 +874,81 @@
                     detailsList.innerHTML += row;
                 });
             }
+
+            // 履歴への保存
+            saveToHistory(data);
+        }
+
+        function recalculateProfitCap() {
+            if (lastRawBuyPrice > 0) {
+                const margin = parseFloat(document.getElementById("profitMarginSelect").value);
+                const offerCap = Math.floor(lastRawBuyPrice * (1 - margin));
+                document.getElementById("calculatedOfferCap").textContent = `${offerCap.toLocaleString()} 円 (粗利 ${(margin * 100).toFixed(0)}%確保)`;
+            }
+        }
+
+        function saveToHistory(data) {
+            let history = JSON.parse(localStorage.getItem("brand_auth_history") || "[]");
+            const record = {
+                date: new Date().toLocaleString("ja-JP"),
+                brand: document.getElementById("brandSelect").value,
+                model: data.detected_model || "特定不能",
+                judgment: data.judgment || "判定不能",
+                score: `${data.overall_score || 0}%`,
+                buyPrice: (data.market_prices && data.market_prices.buy_store) ? data.market_prices.buy_store : "--"
+            };
+            history.unshift(record);
+            if (history.length > 50) history.pop();
+            localStorage.setItem("brand_auth_history", JSON.stringify(history));
+            loadHistoryTable();
+        }
+
+        function loadHistoryTable() {
+            let history = JSON.parse(localStorage.getItem("brand_auth_history") || "[]");
+            const tbody = document.getElementById("historyTableBody");
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#a0aec0;">査定履歴はありません</td></tr>';
+                return;
+            }
+
+            history.forEach(item => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.brand}</td>
+                    <td>${item.model}</td>
+                    <td>${item.judgment}</td>
+                    <td>${item.score}</td>
+                    <td>${item.buyPrice}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportHistoryCSV() {
+            let history = JSON.parse(localStorage.getItem("brand_auth_history") || "[]");
+            if (history.length === 0) {
+                alert("保存された履歴データがありません。");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "日時,ブランド,型番/モデル名,総合判定,AIスコア,買取相場\n";
+
+            history.forEach(row => {
+                csvContent += `"${row.date}","${row.brand}","${row.model.replace(/"/g, '""')}","${row.judgment}","${row.score}","${row.buyPrice}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `査定履歴ログ_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         window.onload = updateFormFields;
