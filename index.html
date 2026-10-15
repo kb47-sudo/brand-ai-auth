@@ -18,6 +18,73 @@
             max-width: 620px;
             width: 100%;
         }
+        
+        /* パスワード保護モーダル */
+        #authLockOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0b132b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .auth-card {
+            background-color: #1c2541;
+            border-radius: 12px;
+            padding: 30px 20px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #3a506b;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .auth-card h2 {
+            color: #f7931a;
+            font-size: 18px;
+            margin: 0 0 10px 0;
+        }
+        .auth-card p {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+        .pass-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #0b132b;
+            border: 1px solid #3a506b;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .btn-lock {
+            background: linear-gradient(135deg, #f7931a, #ffb703);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .error-msg {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 25px;
@@ -181,7 +248,20 @@
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <!-- パスワード保護画面 -->
+    <div id="authLockOverlay">
+        <div class="auth-card">
+            <h2>🔒 システムアクセス制限</h2>
+            <p>ご利用にはセキュリティパスワードが必要です。</p>
+            <input type="password" id="passInput" class="pass-input" placeholder="****" maxlength="8" onkeydown="checkEnter(event)">
+            <button class="btn-lock" onclick="verifyPassword()">認証してログイン</button>
+            <div id="errorMsg" class="error-msg">⚠️ パスワードが違います</div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="container" id="mainContainer" style="display:none;">
         <div class="header">
             <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
             <p>型番適合性AI鑑識 & 付属品連動 動的相場査定エンジン</p>
@@ -244,7 +324,7 @@
                 <label class="checkbox-item"><input type="checkbox" id="acc_gar" value="ギャランティ・保証書あり"> ギャランティ/保証書</label>
                 <label class="checkbox-item"><input type="checkbox" id="acc_box" value="純正箱あり"> 純正箱</label>
                 <label class="checkbox-item"><input type="checkbox" id="acc_link" value="余りコマあり"> 余りコマ (時計)</label>
-                <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・ショッパーあり"> 保存袋/クロシェット</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・クロシェットあり"> 保存袋/クロシェット</label>
             </div>
 
             <span class="label">コンディション目安</span>
@@ -307,6 +387,31 @@
 
     <script>
         const API_BASE = "https://brand-ai-backend-1.onrender.com";
+        const CORRECT_PASS = "4785";
+
+        function verifyPassword() {
+            const inputVal = document.getElementById("passInput").value.trim();
+            if (inputVal === CORRECT_PASS) {
+                document.getElementById("authLockOverlay").style.display = "none";
+                document.getElementById("mainContainer").style.display = "block";
+                sessionStorage.setItem("brand_app_auth", "true");
+                updateFormFields();
+            } else {
+                document.getElementById("errorMsg").style.display = "block";
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                verifyPassword();
+            }
+        }
+
+        // セッション保持チェック
+        if (sessionStorage.getItem("brand_app_auth") === "true") {
+            document.getElementById("authLockOverlay").style.display = "none";
+            document.getElementById("mainContainer").style.display = "block";
+        }
 
         const photoGuides = {
             "腕時計": [
@@ -397,7 +502,6 @@
             document.getElementById("loadingBox").style.display = "block";
             document.getElementById("resultBox").style.display = "none";
 
-            // 付属品情報の収集
             const accList = [];
             if (document.getElementById("acc_gar").checked) accList.push("ギャランティ/保証書あり");
             if (document.getElementById("acc_box").checked) accList.push("純正箱あり");
