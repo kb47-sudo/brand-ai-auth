@@ -64,11 +64,18 @@
             padding: 12px;
             margin-bottom: 12px;
             background-color: rgba(11, 19, 43, 0.5);
+            transition: all 0.3s ease;
         }
         .file-upload-title {
-            font-size: 12px;
-            color: #cbd5e0;
-            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+        .file-upload-desc {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: 8px;
         }
         input[type="file"] {
             display: none;
@@ -152,27 +159,12 @@
     <div class="container">
         <div class="header">
             <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
-            <p>AI真贋判定 & 3大市場相場リアルタイム査定エンジン</p>
+            <p>商材別最適部位撮影 & 動的AI鑑識査定エンジン</p>
         </div>
 
         <div class="card">
             <span class="label">対象ブランド</span>
-            <select id="brandSelect">
-                <optgroup label="バッグ・レザーグッズ">
-                    <option value="Louis Vuitton">Louis Vuitton (ルイ・ヴィトン)</option>
-                    <option value="Chanel">Chanel (シャネル)</option>
-                    <option value="Hermes">Hermes (エルメス)</option>
-                    <option value="Gucci">Gucci (グッチ)</option>
-                    <option value="Prada">Prada (プラダ)</option>
-                    <option value="Celine">Celine (セリーヌ)</option>
-                    <option value="Dior">Dior (ディオール)</option>
-                    <option value="Fendi">Fendi (フェンディ)</option>
-                    <option value="Saint Laurent">Saint Laurent (サンローラン)</option>
-                    <option value="Bottega Veneta">Bottega Veneta (ボッテガ・ヴェネタ)</option>
-                    <option value="Balenciaga">Balenciaga (バレンシアガ)</option>
-                    <option value="Goyard">Goyard (ゴヤール)</option>
-                    <option value="Loewe">Loewe (ロエベ)</option>
-                </optgroup>
+            <select id="brandSelect" onchange="updateFormFields()">
                 <optgroup label="高級時計 (Luxury Watches)">
                     <option value="Rolex">Rolex (ロレックス)</option>
                     <option value="Patek Philippe">Patek Philippe (パテック フィリップ)</option>
@@ -194,29 +186,43 @@
                     <option value="Jaeger-LeCoultre">Jaeger-LeCoultre (ジャガー ルクルト)</option>
                     <option value="Bvlgari">Bvlgari (ブルガリ)</option>
                 </optgroup>
+                <optgroup label="バッグ・レザーグッズ">
+                    <option value="Louis Vuitton" selected>Louis Vuitton (ルイ・ヴィトン)</option>
+                    <option value="Chanel">Chanel (シャネル)</option>
+                    <option value="Hermes">Hermes (エルメス)</option>
+                    <option value="Gucci">Gucci (グッチ)</option>
+                    <option value="Prada">Prada (プラダ)</option>
+                    <option value="Celine">Celine (セリーヌ)</option>
+                    <option value="Dior">Dior (ディオール)</option>
+                    <option value="Fendi">Fendi (フェンディ)</option>
+                    <option value="Saint Laurent">Saint Laurent (サンローラン)</option>
+                    <option value="Bottega Veneta">Bottega Veneta (ボッテガ・ヴェネタ)</option>
+                    <option value="Balenciaga">Balenciaga (バレンシアガ)</option>
+                    <option value="Goyard">Goyard (ゴヤール)</option>
+                    <option value="Loewe">Loewe (ロエベ)</option>
+                </optgroup>
             </select>
 
             <span class="label">カテゴリ</span>
-            <select id="categorySelect">
-                <option value="バッグ">バッグ</option>
+            <select id="categorySelect" onchange="updateFormFields()">
+                <option value="バッグ" selected>バッグ</option>
                 <option value="財布・小物">財布・小物</option>
                 <option value="腕時計">腕時計 (Watch)</option>
-                <option value="アパレル・靴">アパレル・靴</option>
                 <option value="ジュエリー・アクセサリー">ジュエリー・アクセサリー</option>
             </select>
 
-            <span class="label">部位別撮影（※商材に応じた最適ポイント）</span>
+            <span class="label" id="fieldSectionTitle">商材別 最重要鑑定部位（5箇所撮影）</span>
             <div id="fileUploadContainer"></div>
 
-            <span class="label" style="margin-top:10px;">手入力補足型番（空欄でAI完全自動判定）</span>
-            <input type="text" id="modelNumberInput" placeholder="例: Ref.126610LN, M44336, H0940 等">
+            <span class="label" style="margin-top:10px;">補足情報（型番・Ref番号・ギャランティ有無等）</span>
+            <input type="text" id="modelNumberInput" placeholder="空欄でAI完全自動判定（例: Ref.126610LN, ギャラあり箱なし 等）">
 
-            <button class="btn-submit" onclick="submitAuth()">⚡ AI自動識別 & 3大相場査定を実行</button>
+            <button class="btn-submit" onclick="submitAuth()">⚡ 商材別最適AI鑑識 & リアルタイム相場査定</button>
         </div>
 
         <div class="loading" id="loadingBox">
-            <p>🔄 AI多角鑑識 & リアルタイム市場相場を解析中...</p>
-            <p style="font-size:12px; color:#a0aec0;">※初回起動時や精密解析時は数秒〜数十秒かかる場合があります。</p>
+            <p>🔄 商材別プロ鑑識アルゴリズムで解析中...</p>
+            <p style="font-size:12px; color:#a0aec0;">※シリアル照合・文字盤/刻印フォント解析・国内マーケット実勢照合を実行中</p>
         </div>
 
         <div class="result-box" id="resultBox">
@@ -238,9 +244,9 @@
 
             <div class="report-text" id="resMessage"></div>
 
-            <span class="label">推定市場流通相場（買取店・フリマ・オークション）</span>
+            <span class="label">推定市場流通相場（買取店仕入れ・フリマ・オークション）</span>
             <div class="price-card">
-                <span style="color:#a0aec0;">🏢 買取店相場 (仕入れ目安)</span>
+                <span style="color:#a0aec0;">🏢 買取店仕入れ目安</span>
                 <span id="priceBuy" style="font-weight:bold; color:#fff;">-- 円</span>
             </div>
             <div class="price-card">
@@ -248,7 +254,7 @@
                 <span id="priceFlea" style="font-weight:bold; color:#fff;">-- 円</span>
             </div>
             <div class="price-card">
-                <span style="color:#a0aec0;">🔨 オークション (ヤフオク等)</span>
+                <span style="color:#a0aec0;">🔨 オークション相場 (ヤフオク/業者市)</span>
                 <span id="priceAuc" style="font-weight:bold; color:#fff;">-- 円</span>
             </div>
         </div>
@@ -256,26 +262,68 @@
 
     <script>
         const API_BASE = "https://brand-ai-backend-1.onrender.com";
-        const fileFields = [
-            "① 全体写真（表面 / 文字盤全体）",
-            "② 全体写真（裏面 / バックル / 裏蓋）",
-            "③ ブランドロゴ刻印・Ref刻印（接写）",
-            "④ シリアル・製造番号印字（接写）",
-            "⑤ 金具・ビス・リューズ・針（接写）"
-        ];
 
-        const container = document.getElementById("fileUploadContainer");
-        fileFields.forEach((label, idx) => {
-            const html = `
-                <div class="file-upload-box">
-                    <div class="file-upload-title">${label}</div>
-                    <label class="file-btn" for="file_${idx}">ファイルを選択</label>
-                    <span id="fileName_${idx}" style="font-size:12px; color:#a0aec0; margin-left:8px;">選択されていません</span>
-                    <input type="file" id="file_${idx}" accept="image/*" onchange="updateFileName(${idx})">
-                </div>
-            `;
-            container.innerHTML += html;
-        });
+        // カテゴリおよびブランドごとの撮影ポイント・ガイダンスマスター定義
+        const photoGuides = {
+            "腕時計": [
+                { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り、日付サイクロップレンズ" },
+                { name: "② リューズ・ケース側面", desc: "リューズマーク刻印、リューズガード、ケース厚みとヘアライン仕上げ" },
+                { name: "③ 裏蓋・シリアル/Ref刻印", desc: "裏蓋のネジ山、シリアル印字、ルーレット刻印（6時側/ラグ間刻印）" },
+                { name: "④ バックル・クラスプ刻印", desc: "バックル開閉部の王冠/ブランドロゴ、クラスプコード、セーフティロック" },
+                { name: "⑤ 付属品・ギャランティカード", desc: "保証書（Ref/シリアル記載面）、箱、余りコマ、ピスタグ（あれば撮影）" }
+            ],
+            "バッグ": [
+                { name: "① 全体写真（表面シェイプ）", desc: "バッグ全体の型くずれ、柄の対称性、縫製ステッチライン" },
+                { name: "② 全体写真（裏面・背面・底面）", desc: "底鋲、背面ポケット、マチ（厚み）の構造" },
+                { name: "③ ブランドロゴ刻印（接写）", desc: "Made in France/Italy等のレザー刻印、フォントフォージ精度" },
+                { name: "④ シリアル・製造番号刻印", desc: "内側ポケット内や縫い目付近のアルファベット＋4桁数字/RFIDチップ付近" },
+                { name: "⑤ 金具・ビス・ファスナー", desc: "ファスナー引き手ロゴ、カシメの真円性、金具メッキの質感" }
+            ],
+            "財布・小物": [
+                { name: "① 全体写真（表面・開口部）", desc: "財布全体のフチ取り、スナップボタン、柄の配置" },
+                { name: "② 内部構成（カードスリット・コバ）", desc: "カード段数、小銭入れ内部、バニッシュ（コバ塗り）処理" },
+                { name: "③ ブランドロゴ刻印（接写）", desc: "箔押し刻印の鮮明さ、文字間隔、真円性" },
+                { name: "④ シリアル・製造番号印字", desc: "小銭入れ奥やカードポケット裏の刻印" },
+                { name: "⑤ ファスナー引き手・ホック突起", desc: "ホック内部の先端形状（オス/メス）、ファスナー刻印" }
+            ],
+            "ジュエリー・アクセサリー": [
+                { name: "① 全体写真（トップ・デザイン部）", desc: "ストーンの留め爪（爪立て）、金属磨き、仕上げ状態" },
+                { name: "② ブランドロゴ刻印（接写）", desc: "ホールマーク（750, Pt950等）、ブランドサイン刻印" },
+                { name: "③ シリアルナンバリング刻印", desc: "固有シリアル番号、サイズ刻印（例: 52, 17等）" },
+                { name: "④ 留め具・クラスプ構造", desc: "ネックレス/ブレスの留め金、安全コック機構" },
+                { name: "⑤ 付属品・鑑別書・保証書", desc: "メーカー保証書、GIA鑑別書、専用ケース" }
+            ]
+        };
+
+        function updateFormFields() {
+            const category = document.getElementById("categorySelect").value;
+            const brand = document.getElementById("brandSelect").value;
+            
+            // 時計系ブランドが選択されたら自動でカテゴリを「腕時計」に変更
+            const watchBrands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Vacheron Constantin", "Omega", "Cartier", "Grand Seiko", "IWC", "Hublot", "Breguet", "A. Lange & Söhne", "Richard Mille", "Tag Heuer", "Breitling", "Tudor", "Zenith", "Panerai", "Jaeger-LeCoultre"];
+            if (watchBrands.includes(brand) && category !== "腕時計") {
+                document.getElementById("categorySelect").value = "腕時計";
+            }
+
+            const currentCategory = document.getElementById("categorySelect").value;
+            const guides = photoGuides[currentCategory] || photoGuides["バッグ"];
+
+            const container = document.getElementById("fileUploadContainer");
+            container.innerHTML = "";
+
+            guides.forEach((item, idx) => {
+                const html = `
+                    <div class="file-upload-box">
+                        <div class="file-upload-title">${item.name}</div>
+                        <div class="file-upload-desc">📌 ポイント: ${item.desc}</div>
+                        <label class="file-btn" for="file_${idx}">ファイルを選択</label>
+                        <span id="fileName_${idx}" style="font-size:12px; color:#a0aec0; margin-left:8px;">選択されていません</span>
+                        <input type="file" id="file_${idx}" accept="image/*" onchange="updateFileName(${idx})">
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
 
         function updateFileName(idx) {
             const fileInput = document.getElementById(`file_${idx}`);
@@ -287,10 +335,13 @@
         }
 
         async function submitAuth() {
+            const currentCategory = document.getElementById("categorySelect").value;
+            const guides = photoGuides[currentCategory] || photoGuides["バッグ"];
+            
             const files = [];
-            for (let i = 0; i < fileFields.length; i++) {
+            for (let i = 0; i < guides.length; i++) {
                 const input = document.getElementById(`file_${i}`);
-                if (input.files.length > 0) {
+                if (input && input.files.length > 0) {
                     files.push(input.files[0]);
                 }
             }
@@ -358,6 +409,9 @@
                 document.getElementById("priceAuc").textContent = data.market_prices.auction || "-- 円";
             }
         }
+
+        // 初期化実行
+        window.onload = updateFormFields;
     </script>
 </body>
 </html>
