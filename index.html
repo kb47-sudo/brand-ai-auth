@@ -168,7 +168,7 @@
             font-size: 12px;
             font-weight: bold;
             color: #e2e8f0;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         .file-upload-desc {
             font-size: 10px;
@@ -182,11 +182,14 @@
         .file-btn {
             background-color: #3a506b;
             color: #fff;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
             font-size: 11px;
             cursor: pointer;
             display: inline-block;
+        }
+        .file-btn-lib {
+            background-color: #2b6cb0;
         }
         .checkbox-group {
             display: grid;
@@ -456,12 +459,17 @@
                 <option value="ジュエリー・アクセサリー">ジュエリー・アクセサリー</option>
             </select>
 
-            <span class="label">全体写真の選択（※カメラ撮影可）</span>
+            <span class="label">全体写真の選択（撮影 または アルバム選択）</span>
             <div class="file-upload-box">
                 <div class="file-upload-title">全体写真（表面/文字盤）</div>
-                <label class="file-btn" for="step1_file">📷 カメラ起動 / 写真選択</label>
-                <span id="step1_fileName" style="font-size:11px; color:#a0aec0; margin-left:6px;">未選択</span>
-                <input type="file" id="step1_file" accept="image/*" capture="environment" onchange="updateStep1FileName()">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                    <label class="file-btn" for="step1_file_cam">📷 カメラ起動</label>
+                    <input type="file" id="step1_file_cam" accept="image/*" capture="environment" onchange="updateStep1FileName(this)">
+                    
+                    <label class="file-btn file-btn-lib" for="step1_file_lib">🖼️ 写真を選択</label>
+                    <input type="file" id="step1_file_lib" accept="image/*" onchange="updateStep1FileName(this)">
+                </div>
+                <span id="step1_fileName" style="font-size:11px; color:#a0aec0;">未選択</span>
             </div>
 
             <button class="btn-submit" onclick="submitCandidateDetect()">🔍 AIで適合モデル候補（3選）を特定する</button>
@@ -499,7 +507,7 @@
                 <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・証明書あり"> 保存袋/証明書</label>
             </div>
 
-            <span class="label" id="fieldSectionTitle">高精度鑑識撮影枠（最大8アングル / カメラ直結）</span>
+            <span class="label" id="fieldSectionTitle">高精度鑑識撮影枠（最大8アングル）</span>
             <div id="fileUploadContainer" class="file-grid"></div>
 
             <button class="btn-submit" onclick="submitAuth()">⚡ 8部位AI精密鑑識 & 公式定価＋相場査定を実行</button>
@@ -527,7 +535,6 @@
                 </div>
             </div>
 
-            <!-- 赤色ハイライト警告バナー (真贋リスク時自動表示) -->
             <div class="warning-banner" id="warningBanner">
                 <div class="warning-title">⚠️ 検知された違和感・懸念部位</div>
                 <ul class="warning-list" id="warningList"></ul>
@@ -560,7 +567,6 @@
                 </div>
             </div>
 
-            <!-- 一次情報直リンクボタン -->
             <div class="external-links">
                 <a id="linkYahoo" class="btn-link" href="#" target="_blank">🔨 ヤフオク落札履歴を直接確認</a>
                 <a id="linkMercari" class="btn-link" href="#" target="_blank">📱 メルカリ売り切れ履歴を確認</a>
@@ -603,6 +609,7 @@
         let selectedCandidateTitle = "";
         let isManualSelected = false;
         let lastRawBuyPrice = 0;
+        let activeStep1File = null;
 
         function verifyPassword() {
             const inputVal = document.getElementById("passInput").value.trim();
@@ -629,19 +636,18 @@
             window.addEventListener("DOMContentLoaded", loadHistoryTable);
         }
 
-        function updateStep1FileName() {
-            const input = document.getElementById("step1_file");
+        function updateStep1FileName(input) {
             const span = document.getElementById("step1_fileName");
             if (input.files.length > 0) {
-                span.textContent = input.files[0].name;
+                activeStep1File = input.files[0];
+                span.textContent = `選択済: ${activeStep1File.name}`;
                 span.style.color = "#48bb78";
             }
         }
 
         async function submitCandidateDetect() {
-            const fileInput = document.getElementById("step1_file");
-            if (fileInput.files.length === 0) {
-                alert("全体写真を1枚選択してください。");
+            if (!activeStep1File) {
+                alert("全体写真を撮影またはアルバムから1枚選択してください。");
                 return;
             }
 
@@ -651,7 +657,7 @@
             const formData = new FormData();
             formData.append("brand", document.getElementById("brandSelect").value);
             formData.append("category", document.getElementById("categorySelect").value);
-            formData.append("files", fileInput.files[0]);
+            formData.append("files", activeStep1File);
 
             try {
                 const res = await fetch(`${API_BASE}/api/v1/detect_candidates`, {
@@ -793,19 +799,27 @@
                     <div class="file-upload-box">
                         <div class="file-upload-title">${item.name}</div>
                         <div class="file-upload-desc">${item.desc}</div>
-                        <label class="file-btn" for="file_${idx}">📷 カメラ起動 / 写真選択</label>
-                        <span id="fileName_${idx}" style="font-size:10px; color:#a0aec0; margin-left:4px;">未選択</span>
-                        <input type="file" id="file_${idx}" accept="image/*" capture="environment" onchange="updateFileName(${idx})">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+                            <label class="file-btn" for="file_${idx}_cam">📷 撮影</label>
+                            <input type="file" id="file_${idx}_cam" accept="image/*" capture="environment" onchange="updateSubFileName(this, ${idx})">
+                            
+                            <label class="file-btn file-btn-lib" for="file_${idx}_lib">🖼️ 選択</label>
+                            <input type="file" id="file_${idx}_lib" accept="image/*" onchange="updateSubFileName(this, ${idx})">
+                            
+                            <span id="fileName_${idx}" style="font-size:10px; color:#a0aec0; align-self:center; margin-left:4px;">未選択</span>
+                        </div>
                     </div>
                 `;
                 container.innerHTML += html;
             });
         }
 
-        function updateFileName(idx) {
-            const fileInput = document.getElementById(`file_${idx}`);
+        const subFilesMap = {};
+
+        function updateSubFileName(input, idx) {
             const fileNameSpan = document.getElementById(`fileName_${idx}`);
-            if (fileInput.files.length > 0) {
+            if (input.files.length > 0) {
+                subFilesMap[idx] = input.files[0];
                 fileNameSpan.textContent = "OK";
                 fileNameSpan.style.color = "#48bb78";
             }
@@ -817,9 +831,8 @@
             
             const files = [];
             for (let i = 0; i < guides.length; i++) {
-                const input = document.getElementById(`file_${i}`);
-                if (input && input.files.length > 0) {
-                    files.push(input.files[0]);
+                if (subFilesMap[i]) {
+                    files.push(subFilesMap[i]);
                 }
             }
 
@@ -898,7 +911,6 @@
             document.getElementById("resScore").textContent = `${score}%`;
             document.getElementById("resMessage").textContent = data.message || "詳細メッセージなし";
 
-            // ⚠️ 真贋リスク警告ハイライト処理
             const warningBanner = document.getElementById("warningBanner");
             const warningList = document.getElementById("warningList");
             warningList.innerHTML = "";
@@ -923,7 +935,6 @@
 
             warningBanner.style.display = hasRisk ? "block" : "none";
 
-            // 🔗 一次情報直リンクの自動生成
             const cleanQuery = encodeURIComponent(detectedText.replace(/\[.*?\]/g, '').trim());
             document.getElementById("linkYahoo").href = `https://auctions.yahoo.co.jp/closedsearch/closedsearch?p=${cleanQuery}`;
             document.getElementById("linkMercari").href = `https://jp.mercari.com/search?keyword=${cleanQuery}&status=sold_out`;
