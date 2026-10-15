@@ -15,11 +15,10 @@
             justify-content: center;
         }
         .container {
-            max-width: 620px;
+            max-width: 650px;
             width: 100%;
         }
         
-        /* パスワード保護モーダル */
         #authLockOverlay {
             position: fixed;
             top: 0;
@@ -125,24 +124,34 @@
             box-sizing: border-box;
             margin-bottom: 18px;
         }
+        .file-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 480px) {
+            .file-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .file-upload-box {
             border: 1px dashed #3a506b;
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 10px;
             background-color: rgba(11, 19, 43, 0.5);
-            transition: all 0.3s ease;
         }
         .file-upload-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #e2e8f0;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .file-upload-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: #a0aec0;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            line-height: 1.3;
         }
         input[type="file"] {
             display: none;
@@ -150,9 +159,9 @@
         .file-btn {
             background-color: #3a506b;
             color: #fff;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             display: inline-block;
         }
@@ -167,7 +176,7 @@
             margin-bottom: 18px;
         }
         .checkbox-item {
-            font-size: 13px;
+            font-size: 12px;
             color: #e2e8f0;
             display: flex;
             align-items: center;
@@ -221,20 +230,25 @@
             white-space: pre-wrap;
             margin-bottom: 15px;
         }
+        .price-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
         .price-card {
             background-color: #0b132b;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 4px solid #f7931a;
+            border-left: 3px solid #f7931a;
         }
         .price-title {
-            font-size: 12px;
+            font-size: 11px;
             color: #a0aec0;
             margin-bottom: 4px;
         }
         .price-val {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             color: #fff;
         }
@@ -249,7 +263,6 @@
 </head>
 <body>
 
-    <!-- パスワード保護画面 -->
     <div id="authLockOverlay">
         <div class="auth-card">
             <h2>🔒 システムアクセス制限</h2>
@@ -260,11 +273,10 @@
         </div>
     </div>
 
-    <!-- メインコンテンツ -->
     <div class="container" id="mainContainer" style="display:none;">
         <div class="header">
             <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
-            <p>型番適合性AI鑑識 & 付属品連動 動的相場査定エンジン</p>
+            <p>8部位精密AI鑑識 & ランク・付属品連動 動的市場査定</p>
         </div>
 
         <div class="card">
@@ -319,31 +331,31 @@
             <span class="label">指定型番（Ref.番号 / 型番コード）※入力推奨</span>
             <input type="text" id="modelNumberInput" placeholder="入力でAIが画像との照合適合性を判定（例: Ref.126610LN, M44336 等）">
 
-            <span class="label">付属品の有無（※相場変動の超重要要素）</span>
-            <div class="checkbox-group">
-                <label class="checkbox-item"><input type="checkbox" id="acc_gar" value="ギャランティ・保証書あり"> ギャランティ/保証書</label>
-                <label class="checkbox-item"><input type="checkbox" id="acc_box" value="純正箱あり"> 純正箱</label>
-                <label class="checkbox-item"><input type="checkbox" id="acc_link" value="余りコマあり"> 余りコマ (時計)</label>
-                <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・クロシェットあり"> 保存袋/クロシェット</label>
-            </div>
-
-            <span class="label">コンディション目安</span>
+            <span class="label">コンディション指定ランク</span>
             <select id="conditionSelect">
-                <option value="Sランク（未使用・極美品）">Sランク（未使用・展示品クラス）</option>
-                <option value="Aランク（目立つ傷なし・美品）" selected>Aランク（美品・使用感小）</option>
-                <option value="Bランク（通常の使用感・傷あり）">Bランク（一般中古・スレ傷あり）</option>
-                <option value="Cランク（強い使用感・難あり）">Cランク（使用感強・難あり）</option>
+                <option value="N/Sランク（未使用・展示品クラス）">N / Sランク（新品同様・未使用展示品）</option>
+                <option value="Aランク（目立つ傷なし・美品）" selected>Aランク（極美品〜美品・微細なスレ程度）</option>
+                <option value="AB/Bランク（一般中古・通常の使用感）">AB / Bランク（一般中古・日常使用感あり）</option>
+                <option value="Cランク（強い使用感・難あり・ジャンク）">Cランク（傷多数・ダメージ・要リペア）</option>
             </select>
 
-            <span class="label" id="fieldSectionTitle">商材別 最重要鑑定部位（部位別撮影）</span>
-            <div id="fileUploadContainer"></div>
+            <span class="label">付属品の有無（※相場変動の超重要要素）</span>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" id="acc_gar" value="ギャランティ/保証書あり"> ギャランティ/保証書</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_box" value="純正箱あり"> 純正外箱・内箱</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_link" value="余りコマあり"> 余りコマ (時計)</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・証明書あり"> 保存袋/証明書</label>
+            </div>
 
-            <button class="btn-submit" onclick="submitAuth()">⚡ 型番照合 & 付属品連動AI査定を実行</button>
+            <span class="label" id="fieldSectionTitle">商材別 高精度鑑定撮影枠（最大8アングル）</span>
+            <div id="fileUploadContainer" class="file-grid"></div>
+
+            <button class="btn-submit" onclick="submitAuth()">⚡ 8部位AI精密鑑識 & ランク別市場相場査定</button>
         </div>
 
         <div class="loading" id="loadingBox">
-            <p>🔄 指定型番と画像の照合・付属品連動相場を計算中...</p>
-            <p style="font-size:12px; color:#a0aec0;">※型番適合性チェック、シリアル解析、マーケット相場変動試算を実行中</p>
+            <p>🔄 指定型番照合・8部位マルチAI解析・ランク別相場計算中...</p>
+            <p style="font-size:12px; color:#a0aec0;">※20項目超の真贋アルゴリズムおよび国内市場オークションデータを完全照合中</p>
         </div>
 
         <div class="result-box" id="resultBox">
@@ -365,22 +377,24 @@
 
             <div class="report-text" id="resMessage"></div>
 
-            <span class="label">付属品・条件別 推定流通相場（買取・フリマ・ヤフオク）</span>
-            <div class="price-card">
-                <div class="price-title">🏢 買取店仕入れ目安 (指定条件適用後)</div>
-                <div class="price-val" id="priceBuy">-- 円</div>
-            </div>
-            <div class="price-card">
-                <div class="price-title">📱 フリマ市場相場 (メルカリ・ラクマ)</div>
-                <div class="price-val" id="priceFlea">-- 円</div>
-            </div>
-            <div class="price-card">
-                <div class="price-title">🔨 オークション相場 (ヤフオク・業者市)</div>
-                <div class="price-val" id="priceAuc">-- 円</div>
-            </div>
-            <div class="price-card" style="border-left-color: #48bb78; background-color: rgba(72, 187, 120, 0.1);">
-                <div class="price-title" style="color:#68d391;">💡 付属品「完備」時の買取上限目安</div>
-                <div class="price-val" id="priceFull" style="color:#68d391;">-- 円</div>
+            <span class="label">ランク・付属品条件別 推定流通相場マトリクス</span>
+            <div class="price-grid">
+                <div class="price-card">
+                    <div class="price-title">🏢 指定条件での買取目安</div>
+                    <div class="price-val" id="priceBuy">-- 円</div>
+                </div>
+                <div class="price-card">
+                    <div class="price-title">📱 フリマ市場相場 (メルカリ)</div>
+                    <div class="price-val" id="priceFlea">-- 円</div>
+                </div>
+                <div class="price-card">
+                    <div class="price-title">🔨 オークション (ヤフオク/業者市)</div>
+                    <div class="price-val" id="priceAuc">-- 円</div>
+                </div>
+                <div class="price-card" style="border-left-color: #48bb78; background-color: rgba(72, 187, 120, 0.1);">
+                    <div class="price-title" style="color:#68d391;">💡 付属品完備・Sランク時上限</div>
+                    <div class="price-val" id="priceFull" style="color:#68d391;">-- 円</div>
+                </div>
             </div>
         </div>
     </div>
@@ -407,40 +421,52 @@
             }
         }
 
-        // セッション保持チェック
         if (sessionStorage.getItem("brand_app_auth") === "true") {
             document.getElementById("authLockOverlay").style.display = "none";
             document.getElementById("mainContainer").style.display = "block";
         }
 
+        // 8部位精密ガイド定義
         const photoGuides = {
             "腕時計": [
-                { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り、日付レンズ" },
-                { name: "② リューズ・ケース側面", desc: "リューズマーク刻印、リューズガード、ケース厚み仕上げ" },
-                { name: "③ 裏蓋・シリアル/Ref刻印", desc: "裏蓋のネジ山、シリアル印字、ルーレット刻印（6時側/ラグ間）" },
-                { name: "④ バックル・クラスプ刻印", desc: "バックル開閉部の王冠/ブランドロゴ、クラスプコード" },
-                { name: "⑤ 付属品・ギャランティカード", desc: "保証書（Ref/シリアル記載面）、箱、余りコマ" }
+                { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り" },
+                { name: "② 文字盤拡大/ルーレット", desc: "6時位置シリアル刻印、ルーレット刻印、風防透かし" },
+                { name: "③ リューズ・ケース側面", desc: "リューズマーク刻印、パッキン溝、ケース厚み" },
+                { name: "④ 裏蓋・型番/シリアル刻印", desc: "裏蓋ねじ山、ラグ裏刻印、ケースナンバー" },
+                { name: "⑤ バックル外側（ロゴ）", desc: "クラスプ王冠マーク、仕上げポリッシュ感" },
+                { name: "⑥ バックル内側（刻印）", desc: "クラスプコード、裏面刻印フォント、バネ棒" },
+                { name: "⑦ ブレス/ベルト裏・コマ", desc: "コマねじ穴、伸び、革ベルト裏印字・刻印" },
+                { name: "⑧ 付属品・保証書（ギャラ）", desc: "保証書型番/日付面、純正箱、あまりコマ" }
             ],
             "バッグ": [
-                { name: "① 全体写真（表面シェイプ）", desc: "バッグ全体の型くずれ、柄の対称性、縫製ステッチライン" },
-                { name: "② 全体写真（裏面・背面・底面）", desc: "底鋲、背面ポケット、マチ（厚み）の構造" },
-                { name: "③ ブランドロゴ刻印（接写）", desc: "Made in France/Italy等のレザー刻印、フォントフォージ精度" },
-                { name: "④ シリアル・製造番号刻印", desc: "内側ポケット内や縫い目付近のアルファベット＋4桁数字/RFID" },
-                { name: "⑤ 金具・ビス・ファスナー", desc: "ファスナー引き手ロゴ、カシメの真円性、金具メッキの質感" }
+                { name: "① 全体写真（表面シェイプ）", desc: "バッグ全体の型くずれ、柄の対称性、ステッチ" },
+                { name: "② 全体写真（裏面・底面）", desc: "底鋲、底面縫製、マチ（厚み）の構造" },
+                { name: "③ ブランドロゴ刻印（接写）", desc: "Made in France等のレザー刻印、フォント精度" },
+                { name: "④ シリアル・製造番号刻印", desc: "ポケット内奥や縫い目付近の刻印/RFID" },
+                { name: "⑤ 金具・ビス・ファスナー", desc: "引き手ロゴ、カシメの真円性、金具メッキ" },
+                { name: "⑥ ハンドル/ストラップ", desc: "持ち手コバ塗り、コバの割れ、コバ色、縫製" },
+                { name: "⑦ 内装・ポケット内部", desc: "内側生地の質感、ポケットジッパー、タグ" },
+                { name: "⑧ 付属品・証明書・箱", desc: "保存袋、クロシェット、カデナキー、カード" }
             ],
             "財布・小物": [
-                { name: "① 全体写真（表面・開口部）", desc: "財布全体のフチ取り、スナップボタン、柄の配置" },
-                { name: "② 内部構成（カードスリット・コバ）", desc: "カード段数、小銭入れ内部、バニッシュ（コバ塗り）処理" },
+                { name: "① 全体写真（表面・フチ）", desc: "全体形状、スナップボタン、柄の配置" },
+                { name: "② 開口部・内部全体", desc: "カード段数、小銭入れ開口部、マチ構造" },
                 { name: "③ ブランドロゴ刻印（接写）", desc: "箔押し刻印の鮮明さ、文字間隔、真円性" },
-                { name: "④ シリアル・製造番号印字", desc: "小銭入れ奥やカードポケット裏の刻印" },
-                { name: "⑤ ファスナー引き手・ホック突起", desc: "ホック内部の先端形状（オス/メス）、ファスナー刻印" }
+                { name: "④ シリアル・製造番号印字", desc: "ポケット奥やカード段裏の製造刻印" },
+                { name: "⑤ ファスナー/ホック突起", desc: "ホック先端形状（オス/メス）、ファスナー刻印" },
+                { name: "⑥ カード段・コバ塗り処理", desc: "カードスリット断面、バニッシュの厚み" },
+                { name: "⑦ 小銭入れ内部・ライニング", desc: "小銭入れ底面の生地、コインよごれ" },
+                { name: "⑧ 付属品・箱・保存袋", desc: "専用箱、ショッパー、コントロールカード" }
             ],
             "ジュエリー・アクセサリー": [
-                { name: "① 全体写真（トップ・デザイン部）", desc: "ストーンの留め爪（爪立て）、金属磨き、仕上げ状態" },
-                { name: "② ブランドロゴ刻印（接写）", desc: "ホールマーク（750, Pt950等）、ブランドサイン刻印" },
-                { name: "③ シリアルナンバリング刻印", desc: "固有シリアル番号、サイズ刻印（例: 52, 17等）" },
-                { name: "④ 留め具・クラスプ構造", desc: "ネックレス/ブレスの留め金、安全コック機構" },
-                { name: "⑤ 付属品・鑑別書・保証書", desc: "メーカー保証書、GIA鑑別書、専用ケース" }
+                { name: "① 全体写真（トップ部）", desc: "ストーン留め爪、全体の立体感、研磨感" },
+                { name: "② ブランドロゴ刻印（接写）", desc: "ホールマーク（750, Pt950等）、サイン" },
+                { name: "③ シリアル・サイズ刻印", desc: "固有シリアル番号、リングサイズ刻印" },
+                { name: "④ 留め具・クラスプ構造", desc: "ネックレス留め金、安全コック機構" },
+                { name: "⑤ ストーン裏側・光穴", desc: "ダイヤ裏側の光抜き穴、台座の仕上げ" },
+                { name: "⑥ 金属接合部・ロウ付け", desc: "チェーン接合、ロウ付け跡の有無" },
+                { name: "⑦ 刻印エッジ・深さ接写", desc: "ルーペレベルの刻印フォント拡大" },
+                { name: "⑧ 付属品・鑑別書・箱", desc: "GIA鑑定書、メーカー保証書、ケース" }
             ]
         };
 
@@ -463,9 +489,9 @@
                 const html = `
                     <div class="file-upload-box">
                         <div class="file-upload-title">${item.name}</div>
-                        <div class="file-upload-desc">📌 ポイント: ${item.desc}</div>
+                        <div class="file-upload-desc">${item.desc}</div>
                         <label class="file-btn" for="file_${idx}">ファイルを選択</label>
-                        <span id="fileName_${idx}" style="font-size:12px; color:#a0aec0; margin-left:8px;">選択されていません</span>
+                        <span id="fileName_${idx}" style="font-size:10px; color:#a0aec0; margin-left:4px;">未選択</span>
                         <input type="file" id="file_${idx}" accept="image/*" onchange="updateFileName(${idx})">
                     </div>
                 `;
@@ -477,7 +503,7 @@
             const fileInput = document.getElementById(`file_${idx}`);
             const fileNameSpan = document.getElementById(`fileName_${idx}`);
             if (fileInput.files.length > 0) {
-                fileNameSpan.textContent = fileInput.files[0].name;
+                fileNameSpan.textContent = "OK";
                 fileNameSpan.style.color = "#48bb78";
             }
         }
@@ -506,7 +532,7 @@
             if (document.getElementById("acc_gar").checked) accList.push("ギャランティ/保証書あり");
             if (document.getElementById("acc_box").checked) accList.push("純正箱あり");
             if (document.getElementById("acc_link").checked) accList.push("余りコマあり");
-            if (document.getElementById("acc_dust").checked) accList.push("保存袋/クロシェットあり");
+            if (document.getElementById("acc_dust").checked) accList.push("保存袋/証明書あり");
             const accString = accList.length > 0 ? accList.join(", ") : "付属品なし（本体のみ）";
 
             const condition = document.getElementById("conditionSelect").value;
@@ -515,7 +541,7 @@
             const formData = new FormData();
             formData.append("brand", document.getElementById("brandSelect").value);
             formData.append("category", document.getElementById("categorySelect").value);
-            formData.append("model_number", `指定型番: ${modelInput || '未指定'} | 付属品: ${accString} | コンディション: ${condition}`);
+            formData.append("model_number", `指定型番: ${modelInput || '未指定'} | 付属品: ${accString} | コンディションランク: ${condition}`);
             
             files.forEach(f => formData.append("files", f));
 
