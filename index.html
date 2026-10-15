@@ -15,7 +15,7 @@
             justify-content: center;
         }
         .container {
-            max-width: 600px;
+            max-width: 620px;
             width: 100%;
         }
         .header {
@@ -89,6 +89,23 @@
             cursor: pointer;
             display: inline-block;
         }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background-color: #0b132b;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #3a506b;
+            margin-bottom: 18px;
+        }
+        .checkbox-item {
+            font-size: 13px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
         .btn-submit {
             background: linear-gradient(135deg, #f7931a, #ffb703);
             color: #000;
@@ -139,12 +156,20 @@
         }
         .price-card {
             background-color: #0b132b;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f7931a;
+        }
+        .price-title {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 4px;
+        }
+        .price-val {
+            font-size: 15px;
+            font-weight: bold;
+            color: #fff;
         }
         .loading {
             display: none;
@@ -159,7 +184,7 @@
     <div class="container">
         <div class="header">
             <h1>AI AUTHENTICATOR & MARKET VALUATION REPORT</h1>
-            <p>商材別最適部位撮影 & 動的AI鑑識査定エンジン</p>
+            <p>型番適合性AI鑑識 & 付属品連動 動的相場査定エンジン</p>
         </div>
 
         <div class="card">
@@ -211,23 +236,39 @@
                 <option value="ジュエリー・アクセサリー">ジュエリー・アクセサリー</option>
             </select>
 
-            <span class="label" id="fieldSectionTitle">商材別 最重要鑑定部位（5箇所撮影）</span>
+            <span class="label">指定型番（Ref.番号 / 型番コード）※入力推奨</span>
+            <input type="text" id="modelNumberInput" placeholder="入力でAIが画像との照合適合性を判定（例: Ref.126610LN, M44336 等）">
+
+            <span class="label">付属品の有無（※相場変動の超重要要素）</span>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" id="acc_gar" value="ギャランティ・保証書あり"> ギャランティ/保証書</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_box" value="純正箱あり"> 純正箱</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_link" value="余りコマあり"> 余りコマ (時計)</label>
+                <label class="checkbox-item"><input type="checkbox" id="acc_dust" value="保存袋・ショッパーあり"> 保存袋/クロシェット</label>
+            </div>
+
+            <span class="label">コンディション目安</span>
+            <select id="conditionSelect">
+                <option value="Sランク（未使用・極美品）">Sランク（未使用・展示品クラス）</option>
+                <option value="Aランク（目立つ傷なし・美品）" selected>Aランク（美品・使用感小）</option>
+                <option value="Bランク（通常の使用感・傷あり）">Bランク（一般中古・スレ傷あり）</option>
+                <option value="Cランク（強い使用感・難あり）">Cランク（使用感強・難あり）</option>
+            </select>
+
+            <span class="label" id="fieldSectionTitle">商材別 最重要鑑定部位（部位別撮影）</span>
             <div id="fileUploadContainer"></div>
 
-            <span class="label" style="margin-top:10px;">補足情報（型番・Ref番号・ギャランティ有無等）</span>
-            <input type="text" id="modelNumberInput" placeholder="空欄でAI完全自動判定（例: Ref.126610LN, ギャラあり箱なし 等）">
-
-            <button class="btn-submit" onclick="submitAuth()">⚡ 商材別最適AI鑑識 & リアルタイム相場査定</button>
+            <button class="btn-submit" onclick="submitAuth()">⚡ 型番照合 & 付属品連動AI査定を実行</button>
         </div>
 
         <div class="loading" id="loadingBox">
-            <p>🔄 商材別プロ鑑識アルゴリズムで解析中...</p>
-            <p style="font-size:12px; color:#a0aec0;">※シリアル照合・文字盤/刻印フォント解析・国内マーケット実勢照合を実行中</p>
+            <p>🔄 指定型番と画像の照合・付属品連動相場を計算中...</p>
+            <p style="font-size:12px; color:#a0aec0;">※型番適合性チェック、シリアル解析、マーケット相場変動試算を実行中</p>
         </div>
 
         <div class="result-box" id="resultBox">
             <div class="result-header">
-                <div style="font-size:12px; color:#a0aec0;">🔍 AI自動識別 モデル名・特定型番</div>
+                <div style="font-size:12px; color:#a0aec0;">🔍 AI型番特定・照合結果</div>
                 <div id="resModel" style="font-size:16px; font-weight:bold; color:#fff; margin-top:4px;"></div>
             </div>
 
@@ -244,18 +285,22 @@
 
             <div class="report-text" id="resMessage"></div>
 
-            <span class="label">推定市場流通相場（買取店仕入れ・フリマ・オークション）</span>
+            <span class="label">付属品・条件別 推定流通相場（買取・フリマ・ヤフオク）</span>
             <div class="price-card">
-                <span style="color:#a0aec0;">🏢 買取店仕入れ目安</span>
-                <span id="priceBuy" style="font-weight:bold; color:#fff;">-- 円</span>
+                <div class="price-title">🏢 買取店仕入れ目安 (指定条件適用後)</div>
+                <div class="price-val" id="priceBuy">-- 円</div>
             </div>
             <div class="price-card">
-                <span style="color:#a0aec0;">📱 フリマ相場 (メルカリ等)</span>
-                <span id="priceFlea" style="font-weight:bold; color:#fff;">-- 円</span>
+                <div class="price-title">📱 フリマ市場相場 (メルカリ・ラクマ)</div>
+                <div class="price-val" id="priceFlea">-- 円</div>
             </div>
             <div class="price-card">
-                <span style="color:#a0aec0;">🔨 オークション相場 (ヤフオク/業者市)</span>
-                <span id="priceAuc" style="font-weight:bold; color:#fff;">-- 円</span>
+                <div class="price-title">🔨 オークション相場 (ヤフオク・業者市)</div>
+                <div class="price-val" id="priceAuc">-- 円</div>
+            </div>
+            <div class="price-card" style="border-left-color: #48bb78; background-color: rgba(72, 187, 120, 0.1);">
+                <div class="price-title" style="color:#68d391;">💡 付属品「完備」時の買取上限目安</div>
+                <div class="price-val" id="priceFull" style="color:#68d391;">-- 円</div>
             </div>
         </div>
     </div>
@@ -263,20 +308,19 @@
     <script>
         const API_BASE = "https://brand-ai-backend-1.onrender.com";
 
-        // カテゴリおよびブランドごとの撮影ポイント・ガイダンスマスター定義
         const photoGuides = {
             "腕時計": [
-                { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り、日付サイクロップレンズ" },
-                { name: "② リューズ・ケース側面", desc: "リューズマーク刻印、リューズガード、ケース厚みとヘアライン仕上げ" },
-                { name: "③ 裏蓋・シリアル/Ref刻印", desc: "裏蓋のネジ山、シリアル印字、ルーレット刻印（6時側/ラグ間刻印）" },
-                { name: "④ バックル・クラスプ刻印", desc: "バックル開閉部の王冠/ブランドロゴ、クラスプコード、セーフティロック" },
-                { name: "⑤ 付属品・ギャランティカード", desc: "保証書（Ref/シリアル記載面）、箱、余りコマ、ピスタグ（あれば撮影）" }
+                { name: "① 文字盤全体（ダイヤル）", desc: "インデックス、文字盤ロゴ印刷、針の面取り、日付レンズ" },
+                { name: "② リューズ・ケース側面", desc: "リューズマーク刻印、リューズガード、ケース厚み仕上げ" },
+                { name: "③ 裏蓋・シリアル/Ref刻印", desc: "裏蓋のネジ山、シリアル印字、ルーレット刻印（6時側/ラグ間）" },
+                { name: "④ バックル・クラスプ刻印", desc: "バックル開閉部の王冠/ブランドロゴ、クラスプコード" },
+                { name: "⑤ 付属品・ギャランティカード", desc: "保証書（Ref/シリアル記載面）、箱、余りコマ" }
             ],
             "バッグ": [
                 { name: "① 全体写真（表面シェイプ）", desc: "バッグ全体の型くずれ、柄の対称性、縫製ステッチライン" },
                 { name: "② 全体写真（裏面・背面・底面）", desc: "底鋲、背面ポケット、マチ（厚み）の構造" },
                 { name: "③ ブランドロゴ刻印（接写）", desc: "Made in France/Italy等のレザー刻印、フォントフォージ精度" },
-                { name: "④ シリアル・製造番号刻印", desc: "内側ポケット内や縫い目付近のアルファベット＋4桁数字/RFIDチップ付近" },
+                { name: "④ シリアル・製造番号刻印", desc: "内側ポケット内や縫い目付近のアルファベット＋4桁数字/RFID" },
                 { name: "⑤ 金具・ビス・ファスナー", desc: "ファスナー引き手ロゴ、カシメの真円性、金具メッキの質感" }
             ],
             "財布・小物": [
@@ -299,7 +343,6 @@
             const category = document.getElementById("categorySelect").value;
             const brand = document.getElementById("brandSelect").value;
             
-            // 時計系ブランドが選択されたら自動でカテゴリを「腕時計」に変更
             const watchBrands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Vacheron Constantin", "Omega", "Cartier", "Grand Seiko", "IWC", "Hublot", "Breguet", "A. Lange & Söhne", "Richard Mille", "Tag Heuer", "Breitling", "Tudor", "Zenith", "Panerai", "Jaeger-LeCoultre"];
             if (watchBrands.includes(brand) && category !== "腕時計") {
                 document.getElementById("categorySelect").value = "腕時計";
@@ -354,10 +397,21 @@
             document.getElementById("loadingBox").style.display = "block";
             document.getElementById("resultBox").style.display = "none";
 
+            // 付属品情報の収集
+            const accList = [];
+            if (document.getElementById("acc_gar").checked) accList.push("ギャランティ/保証書あり");
+            if (document.getElementById("acc_box").checked) accList.push("純正箱あり");
+            if (document.getElementById("acc_link").checked) accList.push("余りコマあり");
+            if (document.getElementById("acc_dust").checked) accList.push("保存袋/クロシェットあり");
+            const accString = accList.length > 0 ? accList.join(", ") : "付属品なし（本体のみ）";
+
+            const condition = document.getElementById("conditionSelect").value;
+            const modelInput = document.getElementById("modelNumberInput").value;
+
             const formData = new FormData();
             formData.append("brand", document.getElementById("brandSelect").value);
             formData.append("category", document.getElementById("categorySelect").value);
-            formData.append("model_number", document.getElementById("modelNumberInput").value);
+            formData.append("model_number", `指定型番: ${modelInput || '未指定'} | 付属品: ${accString} | コンディション: ${condition}`);
             
             files.forEach(f => formData.append("files", f));
 
@@ -407,10 +461,10 @@
                 document.getElementById("priceBuy").textContent = data.market_prices.buy_store || "-- 円";
                 document.getElementById("priceFlea").textContent = data.market_prices.fleamarket || "-- 円";
                 document.getElementById("priceAuc").textContent = data.market_prices.auction || "-- 円";
+                document.getElementById("priceFull").textContent = data.market_prices.full_set_estimate || "買取相場と同等";
             }
         }
 
-        // 初期化実行
         window.onload = updateFormFields;
     </script>
 </body>
